@@ -1,0 +1,54 @@
+{
+    "name": "HoloInput",
+    "maps": [
+        {
+            "name": "Hololens",
+            "id": "e8d9ce51-3f25-4a2e-bda4-a2120c61ab08",
+            "actions": [
+                {
+                    "name": "PinchRight",
+                    "type": "Button",
+                    "id": "9f8da4d8-4f52-4927-998b-964b6ee7c282",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SqeezeRight",
+                    "type": "Button",
+                    "id": "77f208bd-50a1-4bf6-8be6-8ed3cb0fe406",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0e24c31c-efb1-49e3-83c0-48bec2fe9605",
+                    "path": "<HololensHand>{RightHand}/selectPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinchRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "deab94c8-be0c-41f3-8974-e3b40e4f1b59",
+                    "path": "<HololensHand>{RightHand}/squeezePressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SqeezeRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

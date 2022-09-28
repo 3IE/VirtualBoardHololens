@@ -3,16 +3,15 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    private PhoneInput _phoneInput;
+    private HoloInput holoInput;
     private AppManager _appManager;
     private Vector2 startPosition;
     private void Awake() {
-        _phoneInput = new PhoneInput();
+        holoInput = new HoloInput();
         _appManager = GetComponent<AppManager>();
     }
     private void Start()
     {
-        _phoneInput.Phone.TouchPing.started += Touching;
     }
     //public void SettingUpBoard(bool state)
     //{
@@ -25,17 +24,17 @@ public class InputManager : MonoBehaviour
     {
         if (state)
         {
-            _phoneInput.Phone.TouchPing.performed += Ping;
-            _phoneInput.Phone.TouchPostIt.performed += PostIt;
+            holoInput.Hololens.PinchRight.performed += Ping;
+            //holoInput.Phone.TouchPostIt.performed += PostIt;
         }
         else
         {
-            _phoneInput.Phone.TouchPing.performed -= Ping;
-            _phoneInput.Phone.TouchPostIt.performed -= PostIt;
+            holoInput.Hololens.PinchRight.performed -= Ping;
+            //holoInput.Phone.TouchPostIt.performed -= PostIt;
         }
     }
-    private void Touching(InputAction.CallbackContext ctx)
-        => startPosition = _phoneInput.Phone.TouchPosition.ReadValue<Vector2>();
+    //private void Touching(InputAction.CallbackContext ctx)
+    //    => startPosition = holoInput.Phone.TouchPosition.ReadValue<Vector2>();
 
     //private void Setup(InputAction.CallbackContext ctx)
     //    => StartCoroutine(_appManager.SetAnchor(_phoneInput.Phone.TouchPosition.ReadValue<Vector2>()));
@@ -47,6 +46,6 @@ public class InputManager : MonoBehaviour
         Ping,
         Postit
     }
-    private void OnEnable() => _phoneInput.Enable();
-    private void OnDisable() => _phoneInput.Disable();
+    private void OnEnable() => holoInput.Enable();
+    private void OnDisable() => holoInput.Disable();
 }

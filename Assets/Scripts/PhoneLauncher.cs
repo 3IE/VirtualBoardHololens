@@ -2,6 +2,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
+using Microsoft.MixedReality.Toolkit.UX;
 using UnityEngine;
 using UnityEngine.Serialization;
 using DeviceType = Utils.DeviceType;
@@ -13,6 +14,7 @@ public class PhoneLauncher : MonoBehaviourPunCallbacks
 {
     [SerializeField] private TMPro.TMP_InputField usernameInput;
     [SerializeField] private TMPro.TMP_Text waitingText;
+    [SerializeField] private UGUIInputAdapter waitingButton;
 
     [FormerlySerializedAs("_menuSystem")] [SerializeField]
     private MenuSystem menuSystem;
@@ -55,14 +57,14 @@ public class PhoneLauncher : MonoBehaviourPunCallbacks
 
         PhotonNetwork.SetPlayerCustomProperties(new Hashtable { { "Device", DeviceType.AR } });
 
-        menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Joining);
+        menuSystem.SwitchPanel(MenuSystem.MenuIndex.Joining);
     }
 
     public void Cancel()
     {
         CancelConnection();
 
-        menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Join);
+        menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
     }
 
     private void CancelConnection()
@@ -130,6 +132,7 @@ public class PhoneLauncher : MonoBehaviourPunCallbacks
         else
         {
             waitingText.text = "Ready to join host";
+            waitingButton.interactable = true;
 
             if (!_connecting)
                 return;
@@ -153,6 +156,6 @@ public class PhoneLauncher : MonoBehaviourPunCallbacks
 
         CancelConnection();
 
-        menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Disconnected);
+        menuSystem.SwitchPanel(MenuSystem.MenuIndex.Disconnected);
     }
 }

@@ -6,15 +6,10 @@ using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
-using UnityEngine.XR.ARFoundation;
-using UnityEngine.XR.ARSubsystems;
 using Event = Utils.Event;
 
 public class AppManager : MonoBehaviourPunCallbacks
 {
-    public GameObject ARSession;
-    [SerializeField] private ARAnchorManager _arAnchorManager;
-    [SerializeField] private ARPlaneManager _arPlaneManager;
     [SerializeField] private Camera cam;
     public Transform CamTransform => cam.transform;
     private Vector2 touchpos;
@@ -24,9 +19,6 @@ public class AppManager : MonoBehaviourPunCallbacks
 
     #region prefabs
 
-    [SerializeField] private GameObject setupButtons;
-    [SerializeField] private GameObject ARSessionPrefab;
-    [SerializeField] private GameObject boardVisualiserPrefab;
     [SerializeField] private GameObject pingBall;
     [SerializeField] private GameObject postItPrefab;
     [SerializeField] private GameObject VRAvatarPrefab;
@@ -34,7 +26,6 @@ public class AppManager : MonoBehaviourPunCallbacks
     [SerializeField] private GameObject localPingPrefab;
     [SerializeField] private GameObject onlinePingPrefab;
     [SerializeField] private GameObject board;
-    [SerializeField] private GameObject holoBoardPrefab;
     #endregion
     private Transform boardTransform;
     private Quaternion boardQuaternion;
@@ -45,7 +36,6 @@ public class AppManager : MonoBehaviourPunCallbacks
 
     private Dictionary<int, GameObject> PlayerList;
     [SerializeField] private float _refreshRate = 0.2f;
-    [SerializeField] private float maxDistance = 3f; 
 
     private void Start() //TODO a modifier
     {
@@ -55,93 +45,74 @@ public class AppManager : MonoBehaviourPunCallbacks
     
     #region SetupAR
 
-    public void ARSetup(bool start)
-    {        
-        ARSession.SetActive(start);
-        SettingBoard();
-        //_inputManager.SettingUpBoard(start);
-    }
-
-    public IEnumerator SetAnchor(Vector2 positionOnScreen)
-    {
-        var ray = cam.ScreenPointToRay(positionOnScreen);
-        if (!Physics.Raycast(ray, out hit, 1000f, 1 << 3)) // 3: ARPlane
-            yield break;
-        
-        //_inputManager.SettingUpBoard(false);
-        
-        ARPlane arPlane = hit.collider.gameObject.GetComponent<ARPlane>();
-        Quaternion anchorRotation = Quaternion.LookRotation(new Vector3(cam.transform.forward.x, 0, cam.transform.forward.z), Vector3.up);
-        ARAnchor arAnchor = _arAnchorManager.AttachAnchor(arPlane, new Pose(hit.point, anchorRotation));
-        var boardVisualiser = Instantiate(boardVisualiserPrefab, hit.point, anchorRotation, arAnchor.transform);
-        PrintVar.print(0, $"BoardVisu: {boardVisualiser.transform.position}");
-        setupButtons.SetActive(true);
-        RaycastHit holoHit = new ();
-        while (!_menuSystem.ButtonSetup && !_menuSystem.ButtonSetupCancel)
-        {
-            // animation
-            ray = new Ray(cam.transform.position, cam.transform.forward);
-            if (Physics.Raycast(ray, out holoHit, 1000f, LayerMask.GetMask( "Holo"))) // 6: Holo
-            {
-                PrintVar.print(1, $"holoHit: {holoHit.point}");
-                holoBoardPrefab.SetActive(true);
-                holoBoardPrefab.transform.SetPositionAndRotation(holoHit.point, boardVisualiser.transform.rotation);
-            }
-            PrintVar.print(2, $"Planes: {_arAnchorManager.trackables.count}");
-            yield return null;
-        }
-        Destroy(boardVisualiser);
-        holoBoardPrefab.SetActive(false);
-        
-        if (_menuSystem.ButtonSetupCancel) //?  || holoHit.collider == null
-        {
-            Destroy(arAnchor);
-            //_inputManager.SettingUpBoard(true);
-        }
-        else // ButtonSetup == true
-        {
-            board.transform.SetPositionAndRotation(holoHit.point, boardVisualiser.transform.rotation);
-            board.transform.SetParent(arAnchor.transform);
-            
-            board.SetActive(true);
-            yield return new WaitForSeconds(1f);
-            board.SetActive(false);
-            
-            boardQuaternion = board.transform.rotation;
-            _arPlaneManager.requestedDetectionMode = PlaneDetectionMode.None;
-            
-            //foreach (var plane in _arAnchorManager.trackables)
-            //    if (plane.trackableId != arPlane.trackableId)
-            //        plane.gameObject.SetActive(false);
-            ARSetup(false);
-            _menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Join);
-        }
-        setupButtons.SetActive(false);
-        _menuSystem.ButtonSetup = _menuSystem.ButtonSetupCancel = false;
-    }
-
-    public void SettingBoard()
-    {
-        board.SetActive(true);
-        boardTransform.SetParent(CamTransform);
-    }
+    //public IEnumerator SetAnchor(Vector2 positionOnScreen)
+    //{
+    //    var ray = cam.ScreenPointToRay(positionOnScreen);
+    //    if (!Physics.Raycast(ray, out hit, 1000f, 1 << 3)) // 3: ARPlane
+    //        yield break;
+    //    
+    //    //_inputManager.SettingUpBoard(false);
+    //    
+    //    ARPlane arPlane = hit.collider.gameObject.GetComponent<ARPlane>();
+    //    Quaternion anchorRotation = Quaternion.LookRotation(new Vector3(cam.transform.forward.x, 0, cam.transform.forward.z), Vector3.up);
+    //    ARAnchor arAnchor = _arAnchorManager.AttachAnchor(arPlane, new Pose(hit.point, anchorRotation));
+    //    var boardVisualiser = Instantiate(boardVisualiserPrefab, hit.point, anchorRotation, arAnchor.transform);
+    //    PrintVar.print(0, $"BoardVisu: {boardVisualiser.transform.position}");
+    //    setupButtons.SetActive(true);
+    //    RaycastHit holoHit = new ();
+    //    while (!_menuSystem.ButtonSetup && !_menuSystem.ButtonSetupCancel)
+    //    {
+    //        // animation
+    //        ray = new Ray(cam.transform.position, cam.transform.forward);
+    //        if (Physics.Raycast(ray, out holoHit, 1000f, LayerMask.GetMask( "Holo"))) // 6: Holo
+    //        {
+    //            PrintVar.print(1, $"holoHit: {holoHit.point}");
+    //            holoBoardPrefab.SetActive(true);
+    //            holoBoardPrefab.transform.SetPositionAndRotation(holoHit.point, boardVisualiser.transform.rotation);
+    //        }
+    //        PrintVar.print(2, $"Planes: {_arAnchorManager.trackables.count}");
+    //        yield return null;
+    //    }
+    //    Destroy(boardVisualiser);
+    //    holoBoardPrefab.SetActive(false);
+    //    
+    //    if (_menuSystem.ButtonSetupCancel) //?  || holoHit.collider == null
+    //    {
+    //        Destroy(arAnchor);
+    //        //_inputManager.SettingUpBoard(true);
+    //    }
+    //    else // ButtonSetup == true
+    //    {
+    //        board.transform.SetPositionAndRotation(holoHit.point, boardVisualiser.transform.rotation);
+    //        board.transform.SetParent(arAnchor.transform);
+    //        
+    //        board.SetActive(true);
+    //        yield return new WaitForSeconds(1f);
+    //        board.SetActive(false);
+    //        
+    //        boardQuaternion = board.transform.rotation;
+    //        _arPlaneManager.requestedDetectionMode = PlaneDetectionMode.None;
+    //        
+    //        //foreach (var plane in _arAnchorManager.trackables)
+    //        //    if (plane.trackableId != arPlane.trackableId)
+    //        //        plane.gameObject.SetActive(false);
+    //        ARSetup(false);
+    //        _menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Join);
+    //    }
+    //    setupButtons.SetActive(false);
+    //    _menuSystem.ButtonSetup = _menuSystem.ButtonSetupCancel = false;
+    //}
 
     public void SetBoard()
     {
+        board.SetActive(true);
         var currentRotation = boardTransform.rotation.eulerAngles;
         boardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
         boardQuaternion = board.transform.rotation;
-        ARSetup(false);
         boardTransform.SetParent(null);
-        _menuSystem.SwitchSubpanel(MenuSystem.MenuIndex.Join);
+        _menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
     }
 
-    public void SlideBoard(float distance)
-    {
-        PrintVar.print(0, $"Slide value: {distance}");
-        var Distance = distance * maxDistance;
-        boardTransform.localPosition = new Vector3(0, 0, Distance);
-    }
     #endregion
 
     #region InRoom
@@ -173,20 +144,12 @@ public class AppManager : MonoBehaviourPunCallbacks
         GetAllPlayerInRoom();
         PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPlayerIn,  CamTransform.position - boardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
         InvokeRepeating(nameof(SendNewPositionEvent), _refreshRate, _refreshRate);
-        if (ARSession != null)
-            ARSession.SetActive(true);
-        else
-            ARSession = Instantiate(ARSessionPrefab, Vector3.zero, Quaternion.identity);
-        board.SetActive(true);
         _inputManager.InSession(true);
     }
     public void StopSession() {
         _inputManager.InSession(false);
         CancelInvoke();
-        if (ARSession != null)
-            ARSession.SetActive(false);
-        if (ARSession != null)
-            board.SetActive(false);
+        board.SetActive(false);
     }
     private void Ping(Vector3 position)
     { // pooling des ping, 2 prefab de ping (un pour l'utilisateur et un pour les autres) 
@@ -238,7 +201,6 @@ public class AppManager : MonoBehaviourPunCallbacks
         pingBall.SetActive(false);
         // pingBall.transform.position = new Vector3(0, 0, 0); // Pas forcément important
     }
-
     public static void SendNewPostItEvent(Vector2 position, string text)
     {
         // We send the whole texture
@@ -250,7 +212,6 @@ public class AppManager : MonoBehaviourPunCallbacks
         // We send the event
         PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPostIt, content, raiseEventOptions, SendOptions.SendReliable);
     }
-
     public void SendNewPositionEvent()
     {
         var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
@@ -298,7 +259,7 @@ public class AppManager : MonoBehaviourPunCallbacks
                     , text, Color.cyan); // On verra plus tard pour que la couleur varie en fc du joueur
                 break;
             case Event.EventCode.SendNewPosition:
-                if (!ARSession.activeSelf || !PlayerList.ContainsKey(photonEvent.Sender))
+                if (!PlayerList.ContainsKey(photonEvent.Sender))
                     return;
                 MoveOverTime(photonEvent.Sender, (Vector3) photonEvent.CustomData);
                 break;
