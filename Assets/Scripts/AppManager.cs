@@ -102,10 +102,9 @@ public class AppManager : MonoBehaviourPunCallbacks
     //    setupButtons.SetActive(false);
     //    _menuSystem.ButtonSetup = _menuSystem.ButtonSetupCancel = false;
     //}
-
+    
     public void SetBoard()
     {
-        board.SetActive(true);
         var currentRotation = boardTransform.rotation.eulerAngles;
         boardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
         boardQuaternion = board.transform.rotation;
