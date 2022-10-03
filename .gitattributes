@@ -27,3 +27,5 @@
 
 #MixedrealityPackage
 Packages/MixedReality/* filter=lfs diff=lfs merge=lfs -text
+#Photon
+Assets/Photon/PhotonVoice/PhotonVoiceLibs/* filter=lfs diff=lfs merge=lfs -text
