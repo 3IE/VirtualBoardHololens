@@ -139,6 +139,9 @@ public class AppManager : MonoBehaviourPunCallbacks
     }
     
     public void StartSession() {
+        if (!PhotonNetwork.InRoom) return;
+        
+        _menuSystem.TurnOffMenu();
         PlayerList = new Dictionary<int, GameObject>();
         GetAllPlayerInRoom();
         PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPlayerIn,  CamTransform.position - boardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
@@ -148,7 +151,8 @@ public class AppManager : MonoBehaviourPunCallbacks
     public void StopSession() {
         _inputManager.InSession(false);
         CancelInvoke();
-        board.SetActive(false);
+        if (board != null)
+            board.SetActive(false);
     }
     private void Ping(Vector3 position)
     { // pooling des ping, 2 prefab de ping (un pour l'utilisateur et un pour les autres) 
