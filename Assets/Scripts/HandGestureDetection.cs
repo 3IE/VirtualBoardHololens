@@ -17,8 +17,8 @@ public struct Gesture
 public class HandGestureDetection : MonoBehaviour
 {
     public Transform HandTransform;
-    private HandsAggregatorSubsystem handsSubsystem;
-    private XRNode handNode = XRNode.LeftHand;
+    private HandsSubsystem handsSubsystem;
+    public XRNode handNode;
     public List<Gesture> gestureList;
     private const int fingerCount = 26;
     public float threshold = 0.1f;
@@ -33,9 +33,9 @@ public class HandGestureDetection : MonoBehaviour
 
     protected void OnEnable()
     {
-        Debug.Assert(handNode == XRNode.LeftHand || handNode == XRNode.RightHand, $"HandVisualizer has an invalid XRNode ({handNode})!");
+        Debug.Assert(handNode is XRNode.LeftHand or XRNode.RightHand, $"HandVisualizer has an invalid XRNode ({handNode})!");
 
-        handsSubsystem = XRSubsystemHelpers.GetFirstRunningSubsystem<HandsAggregatorSubsystem>();
+        handsSubsystem = XRSubsystemHelpers.GetFirstRunningSubsystem<HandsSubsystem>();
 
         if (handsSubsystem == null)
             StartCoroutine(EnableWhenSubsystemAvailable());
@@ -68,7 +68,7 @@ public class HandGestureDetection : MonoBehaviour
         }
     }
 
-    Gesture Recognize(IReadOnlyList<HandJointPose> joints)
+    private Gesture Recognize(IReadOnlyList<HandJointPose> joints)
     {
         Gesture currentGesture = new ();
         float currentMin = Mathf.Infinity;
@@ -98,7 +98,7 @@ public class HandGestureDetection : MonoBehaviour
     public void SaveGesture()
     {
         Debug.Log("Try get new gesture"); 
-        if (!handsSubsystem.TryGetEntireHand(handNode, out IReadOnlyList<HandJointPose> joints)) 
+        if (!handsSubsystem.TryGetEntireHand(handNode, out IReadOnlyList<HandJointPose> joints))
             return;
         List<Vector3> data = 
             joints.Select(j => HandTransform.InverseTransformPoint(j.Position)).ToList();
