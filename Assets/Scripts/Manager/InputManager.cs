@@ -39,9 +39,13 @@ public class InputManager : MonoBehaviour
     //private void Setup(InputAction.CallbackContext ctx)
     //    => StartCoroutine(_appManager.SetAnchor(_phoneInput.Phone.TouchPosition.ReadValue<Vector2>()));
     private void PostIt(InputAction.CallbackContext ctx)
-        => _appManager.Action(startPosition, actionType.Postit);
+    {
+        //_appManager.Action(startPosition, actionType.Postit);
+    }
     private void Ping(InputAction.CallbackContext ctx)
-        => _appManager.Action(startPosition, actionType.Ping);
+    {
+        //_appManager.Action(startPosition, actionType.Ping);
+    }
     public enum actionType : byte {
         Ping,
         Postit

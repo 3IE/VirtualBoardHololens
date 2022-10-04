@@ -16,11 +16,15 @@ public struct Gesture
 }
 public class HandGestureDetection : MonoBehaviour
 {
+    [SerializeField] private HoloPlayerManager holoPlayerManager;
+    
+    [SerializeField] private Transform cursor;
     public Transform HandTransform;
     private HandsSubsystem handsSubsystem;
     public XRNode handNode;
-    public List<Gesture> gestureList;
     private const int fingerCount = 26;
+    
+    public List<Gesture> gestureList;
     public float threshold = 0.1f;
     private Gesture previousGesture;
 
@@ -48,7 +52,7 @@ public class HandGestureDetection : MonoBehaviour
     
     private void Update()
     {
-        //! TMP
+        //! TMP: Allow to make more gestures
         if (Input.GetKeyDown(KeyCode.Space))
             SaveGesture();
         //! TMP
@@ -63,7 +67,7 @@ public class HandGestureDetection : MonoBehaviour
         if (hasRecognised && !currentGesture.Equals(previousGesture))
         {
             Debug.Log($"Gesture recognized: {currentGesture.name}");
-            //currentGesture.onRecognized.Invoke();
+            currentGesture.onRecognized?.Invoke();
             previousGesture = currentGesture;
         }
     }
@@ -95,6 +99,15 @@ public class HandGestureDetection : MonoBehaviour
         }
         return currentGesture;
     }
+
+    public void PointingPing()
+    {
+        Ray ray = new Ray(HandTransform.position, cursor.position - HandTransform.position);
+        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
+        if (hit.collider.gameObject.CompareTag("Board"))
+            holoPlayerManager.Ping(hit.point);
+    }
+    
     public void SaveGesture()
     {
         Debug.Log("Try get new gesture"); 

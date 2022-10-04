@@ -19,20 +19,21 @@ public class AppManager : MonoBehaviourPunCallbacks
 
     #region prefabs
 
-    [SerializeField] private GameObject pingBall;
-    [SerializeField] private GameObject postItPrefab;
-    [SerializeField] private GameObject VRAvatarPrefab;
-    [SerializeField] private GameObject ARAvatarPrefab;
-    [SerializeField] private GameObject localPingPrefab;
-    [SerializeField] private GameObject onlinePingPrefab;
-    [SerializeField] private GameObject board;
+    //[SerializeField] private GameObject pingBall;
+    public GameObject postItPrefab;
+    public GameObject VRAvatarPrefab;
+    public GameObject ARAvatarPrefab;
+    public GameObject localPingPrefab;
+    public GameObject onlinePingPrefab;
+    public GameObject board;
     #endregion
-    private Transform boardTransform;
+    
+    public Transform BoardTransform { get; private set; }
     private Quaternion boardQuaternion;
     
     [SerializeField] private MenuSystem _menuSystem;
     private InputManager _inputManager;
-    private bool Free = true;
+    private EventManager _eventManager;
 
     private Dictionary<int, GameObject> PlayerList;
     [SerializeField] private float _refreshRate = 0.2f;
@@ -40,7 +41,8 @@ public class AppManager : MonoBehaviourPunCallbacks
     private void Start() //TODO a modifier
     {
         _inputManager = GetComponent<InputManager>();
-        boardTransform = board.transform;
+        _eventManager = GetComponent<EventManager>();
+        BoardTransform = board.transform;
     }
     
     #region SetupAR
@@ -105,47 +107,35 @@ public class AppManager : MonoBehaviourPunCallbacks
     
     public void SetBoard()
     {
-        var currentRotation = boardTransform.rotation.eulerAngles;
-        boardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
+        var currentRotation = BoardTransform.rotation.eulerAngles;
+        BoardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
         boardQuaternion = board.transform.rotation;
-        boardTransform.SetParent(null);
+        BoardTransform.SetParent(null);
         _menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
     }
 
     #endregion
 
     #region InRoom
-    public void Action(Vector2 positionOnScreen, InputManager.actionType actionType) 
+
+    public override void OnJoinedRoom()
     {
-        if (!Free) return;
-        var ray = cam.ScreenPointToRay(positionOnScreen);
-
-        if (!Physics.Raycast(ray, out hit)) return;
-        
-        var hitObj = hit.collider.gameObject;
-
-        if (!hitObj.CompareTag("Board")) return;
-        switch (actionType)
-        {
-            case InputManager.actionType.Ping: 
-                Ping(hit.point);
-                break;
-            case InputManager.actionType.Postit:
-                StartCoroutine(Post_it(hit.point));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
-        }
+        base.OnJoinedRoom();
+        StartSession();
     }
-    
+
     public void StartSession() {
         if (!PhotonNetwork.InRoom) return;
         
         _menuSystem.TurnOffMenu();
+        board.SetActive(true);
+        
         PlayerList = new Dictionary<int, GameObject>();
+        
         GetAllPlayerInRoom();
-        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPlayerIn,  CamTransform.position - boardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
-        InvokeRepeating(nameof(SendNewPositionEvent), _refreshRate, _refreshRate);
+        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPlayerIn,  CamTransform.position - BoardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
+        
+        InvokeRepeating(nameof(SendNewPosition) , _refreshRate, _refreshRate);
         _inputManager.InSession(true);
     }
     public void StopSession() {
@@ -154,14 +144,9 @@ public class AppManager : MonoBehaviourPunCallbacks
         if (board != null)
             board.SetActive(false);
     }
-    private void Ping(Vector3 position)
-    { // pooling des ping, 2 prefab de ping (un pour l'utilisateur et un pour les autres) 
-        // ping physique
-        var ping = Instantiate(localPingPrefab,  position, boardQuaternion, board.transform);
-        // ping sur le reseaux
-        var localPos = ping.transform.localPosition;
-        SendNewPingEvent(new Vector2(localPos.x, localPos.y));
-    }
+
+    private void SendNewPosition() => _eventManager.SendNewPositionEvent();
+    
     private void OnlinePing(Vector2 position)
     {
         var ping = Instantiate(onlinePingPrefab, new Vector3(0, -10, 0), boardQuaternion, board.transform);
@@ -169,24 +154,19 @@ public class AppManager : MonoBehaviourPunCallbacks
         _pingSearcher.AssignedPing = ping;
         _pingSearcher.gameObject.SetActive(true);
     }
-    private void SendNewPingEvent(Vector2 position)
-    {
-        var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-
-        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
-    }
-    private IEnumerator Post_it(Vector3 position)
-    {
-        Free = false;
-        yield return PingBall(position);
-        yield return _menuSystem.Post_it_Prompt();
-        if (_menuSystem.postItText != "") {
-            var postIt = Post_it_Instantiate(position, _menuSystem.postItText,Color.yellow);
-            var localPos = postIt.transform.localPosition;
-            SendNewPostItEvent(new Vector2(localPos.x, localPos.y), _menuSystem.postItText);
-        }
-        Free = true;
-    }
+    
+    //private IEnumerator Post_it(Vector3 position)
+    //{
+    //    Free = false;
+    //    yield return PingBall(position);
+    //    yield return _menuSystem.Post_it_Prompt();
+    //    if (_menuSystem.postItText != "") {
+    //        var postIt = Post_it_Instantiate(position, _menuSystem.postItText,Color.yellow);
+    //        var localPos = postIt.transform.localPosition;
+    //        SendNewPostItEvent(new Vector2(localPos.x, localPos.y), _menuSystem.postItText);
+    //    }
+    //    Free = true;
+    //}
     private GameObject Post_it_Instantiate(Vector3 position, string text, Color color)
     {
         var postIt = Instantiate(postItPrefab,  position, boardQuaternion, board.transform);
@@ -196,31 +176,26 @@ public class AppManager : MonoBehaviourPunCallbacks
     }
     
     // Pool a ball at a position, then 1sec later pull it back
-    private IEnumerator PingBall(Vector3 position)
-    {
-        pingBall.transform.position = position;
-        pingBall.SetActive(true);
-        yield return new WaitForSeconds(1);
-        pingBall.SetActive(false);
-        // pingBall.transform.position = new Vector3(0, 0, 0); // Pas forcément important
-    }
-    public static void SendNewPostItEvent(Vector2 position, string text)
-    {
-        // We send the whole texture
-        object[] content = { position, text };
+    //private IEnumerator PingBall(Vector3 position)
+    //{
+    //    pingBall.transform.position = position;
+    //    pingBall.SetActive(true);
+    //    yield return new WaitForSeconds(1);
+    //    pingBall.SetActive(false);
+    //    // pingBall.transform.position = new Vector3(0, 0, 0); // Pas forcément important
+    //}
+    //public static void SendNewPostItEvent(Vector2 position, string text)
+    //{
+    //    // We send the whole texture
+    //    object[] content = { position, text };
 
-        // We send the data to every other person in the room
-        var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+    //    // We send the data to every other person in the room
+    //    var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
 
-        // We send the event
-        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPostIt, content, raiseEventOptions, SendOptions.SendReliable);
-    }
-    public void SendNewPositionEvent()
-    {
-        var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-
-        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPosition, CamTransform.position - boardTransform.position, raiseEventOptions, SendOptions.SendUnreliable);
-    }
+    //    // We send the event
+    //    PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPostIt, content, raiseEventOptions, SendOptions.SendReliable);
+    //}
+    
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
@@ -273,7 +248,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     }
     private void MoveOverTime(int id, Vector3 position)
     {
-        position += boardTransform.position;
+        position += BoardTransform.position;
         var gameObj = PlayerList[id];
         //PrintVar.Print(3, $"Moving {id} from {gameObj.transform.position} to {position}");
         StartCoroutine(MoveOverTimeLerp(gameObj.transform, gameObj.transform.position, position, _refreshRate));
@@ -287,17 +262,19 @@ public class AppManager : MonoBehaviourPunCallbacks
             i += Time.fixedDeltaTime;
             yield return null;
         }
-        obj.LookAt(boardTransform);
+        obj.LookAt(BoardTransform);
     }
     
     #endregion
 
-    public override void OnEnable() {
+    public override void OnEnable()
+    {
         base.OnEnable();
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
 
-    public override void OnDisable() {
+    public override void OnDisable()
+    {
         base.OnDisable();
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
