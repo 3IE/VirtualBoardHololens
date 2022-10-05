@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using System.Collections;
+using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
@@ -10,6 +10,7 @@ using Event = Utils.Event;
 
 public class AppManager : MonoBehaviourPunCallbacks
 {
+    [SerializeField] private MenuSystem _menuSystem;
     [SerializeField] private Camera cam;
     public Transform CamTransform => cam.transform;
     private Vector2 touchpos;
@@ -19,6 +20,7 @@ public class AppManager : MonoBehaviourPunCallbacks
 
     #region prefabs
 
+    [Header("Prefabs")]
     //[SerializeField] private GameObject pingBall;
     public GameObject postItPrefab;
     public GameObject VRAvatarPrefab;
@@ -26,19 +28,18 @@ public class AppManager : MonoBehaviourPunCallbacks
     public GameObject localPingPrefab;
     public GameObject onlinePingPrefab;
     public GameObject board;
+    
     #endregion
     
     public Transform BoardTransform { get; private set; }
-    private Quaternion boardQuaternion;
     
-    [SerializeField] private MenuSystem _menuSystem;
     private InputManager _inputManager;
     private EventManager _eventManager;
 
     private Dictionary<int, GameObject> PlayerList;
     [SerializeField] private float _refreshRate = 0.2f;
 
-    private void Start() //TODO a modifier
+    private void Start()
     {
         _inputManager = GetComponent<InputManager>();
         _eventManager = GetComponent<EventManager>();
@@ -92,7 +93,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     //        yield return new WaitForSeconds(1f);
     //        board.SetActive(false);
     //        
-    //        boardQuaternion = board.transform.rotation;
+    //        BoardTransform.rotation = board.transform.rotation;
     //        _arPlaneManager.requestedDetectionMode = PlaneDetectionMode.None;
     //        
     //        //foreach (var plane in _arAnchorManager.trackables)
@@ -109,8 +110,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     {
         var currentRotation = BoardTransform.rotation.eulerAngles;
         BoardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
-        boardQuaternion = board.transform.rotation;
-        BoardTransform.SetParent(null);
+        BoardTransform.GetComponent<ObjectManipulator>().enabled = false;
         _menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
     }
 
@@ -149,7 +149,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     
     private void OnlinePing(Vector2 position)
     {
-        var ping = Instantiate(onlinePingPrefab, new Vector3(0, -10, 0), boardQuaternion, board.transform);
+        var ping = Instantiate(onlinePingPrefab, new Vector3(0, -10, 0), BoardTransform.rotation, board.transform);
         ping.transform.localPosition = new Vector3(position.x, position.y, 0);
         _pingSearcher.AssignedPing = ping;
         _pingSearcher.gameObject.SetActive(true);
@@ -169,7 +169,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     //}
     private GameObject Post_it_Instantiate(Vector3 position, string text, Color color)
     {
-        var postIt = Instantiate(postItPrefab,  position, boardQuaternion, board.transform);
+        var postIt = Instantiate(postItPrefab,  position, BoardTransform.rotation, board.transform);
         postIt.GetComponentInChildren<TMP_Text>().text = text;
         postIt.GetComponentInChildren<Renderer>().material.color = color;
         return postIt;

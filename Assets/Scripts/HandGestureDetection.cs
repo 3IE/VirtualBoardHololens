@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Subsystems;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR;
@@ -13,6 +15,8 @@ public struct Gesture
     public string name;
     public List<Vector3> fingerDatas;
     public UnityEvent onRecognized;
+    public float Cooldown; //? Cooldown before the gesture can be recognized again ?
+    public bool isOnCooldown;
 }
 public class HandGestureDetection : MonoBehaviour
 {
@@ -20,16 +24,21 @@ public class HandGestureDetection : MonoBehaviour
     
     [SerializeField] private Transform cursor;
     public Transform HandTransform;
+    [SerializeField] private Transform thumbUpHeart;
+    
     private HandsSubsystem handsSubsystem;
+    //private MRTKRayInteractor rayInteractor;
+    
     public XRNode handNode;
     private const int fingerCount = 26;
     
-    public List<Gesture> gestureList;
     public float threshold = 0.1f;
+    public List<Gesture> gestureList;
     private Gesture previousGesture;
 
     private void Awake()
     {
+        //rayInteractor = GetComponentInChildren<MRTKRayInteractor>();
         if (HandTransform == null)
             HandTransform = transform;
         previousGesture = new Gesture();
@@ -64,11 +73,12 @@ public class HandGestureDetection : MonoBehaviour
         Gesture currentGesture = Recognize(joints);
         bool hasRecognised = !currentGesture.Equals(new());
         
-        if (hasRecognised && !currentGesture.Equals(previousGesture))
+        if (hasRecognised && !currentGesture.Equals(previousGesture) && !currentGesture.isOnCooldown)
         {
             Debug.Log($"Gesture recognized: {currentGesture.name}");
             currentGesture.onRecognized?.Invoke();
             previousGesture = currentGesture;
+            StartCoroutine(SetOnCooldown(currentGesture));
         }
     }
 
@@ -100,12 +110,31 @@ public class HandGestureDetection : MonoBehaviour
         return currentGesture;
     }
 
+    private IEnumerator SetOnCooldown(Gesture gesture)
+    {
+        gesture.isOnCooldown = true;
+        yield return new WaitForSeconds(gesture.Cooldown);
+        gesture.isOnCooldown = false;
+    }
+    
+    public void Pointing()
+    { // If we have any idea for the pointing gesture
+        // rayInteractor ?
+    }
+    
     public void PointingPing()
     {
         Ray ray = new Ray(HandTransform.position, cursor.position - HandTransform.position);
         if (!Physics.Raycast(ray, out RaycastHit hit)) return;
         if (hit.collider.gameObject.CompareTag("Board"))
             holoPlayerManager.Ping(hit.point);
+    }
+    
+    public void ThumbUp()
+    {
+        //todo holoPlayerManager.ThumbUp();
+        thumbUpHeart.position = handsSubsystem.TryGetJoint(TrackedHandJoint.ThumbTip, handNode, out HandJointPose thumbTipPose) ? thumbTipPose.Position : HandTransform.position;
+        thumbUpHeart.gameObject.SetActive(true);
     }
     
     public void SaveGesture()
