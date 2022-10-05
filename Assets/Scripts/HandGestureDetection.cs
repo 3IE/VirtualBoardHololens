@@ -118,16 +118,22 @@ public class HandGestureDetection : MonoBehaviour
     }
     
     public void Pointing()
-    { // If we have any idea for the pointing gesture
-        // rayInteractor ?
+    {
+        if (!handsSubsystem.TryGetJoint(TrackedHandJoint.IndexTip, handNode, out HandJointPose indexTip)
+            || !handsSubsystem.TryGetJoint(TrackedHandJoint.IndexProximal, handNode, out HandJointPose indexBase))
+            return;
+        Ray ray = new Ray(indexBase.Position, indexTip.Position - indexBase.Position);
+        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
+        if (!hit.collider.gameObject.CompareTag("Board")) return;
+        // move cursor to hit position
+        cursor.position = hit.point;
     }
     
     public void PointingPing()
     {
-        Ray ray = new Ray(HandTransform.position, cursor.position - HandTransform.position);
-        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
-        if (hit.collider.gameObject.CompareTag("Board"))
-            holoPlayerManager.Ping(hit.point);
+        if (!cursor.gameObject.activeSelf) // if cursor not already set
+            Pointing();
+        holoPlayerManager.Ping(cursor.position);
     }
     
     public void ThumbUp()
