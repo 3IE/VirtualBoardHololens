@@ -35,6 +35,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     
     private InputManager _inputManager;
     private EventManager _eventManager;
+    private HoloPlayerManager _playerManager;
 
     private Dictionary<int, GameObject> PlayerList;
     [SerializeField] private float _refreshRate = 0.2f;
@@ -43,6 +44,7 @@ public class AppManager : MonoBehaviourPunCallbacks
     {
         _inputManager = GetComponent<InputManager>();
         _eventManager = GetComponent<EventManager>();
+        _playerManager = GetComponent<HoloPlayerManager>();
         BoardTransform = board.transform;
     }
     
@@ -129,6 +131,7 @@ public class AppManager : MonoBehaviourPunCallbacks
         
         _menuSystem.TurnOffMenu();
         board.SetActive(true);
+        _playerManager.handGestureDetection.enabled = true;
         
         PlayerList = new Dictionary<int, GameObject>();
         

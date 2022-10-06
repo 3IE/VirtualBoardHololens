@@ -2,9 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.MixedReality.Toolkit;
-using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Subsystems;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR;
@@ -17,28 +15,38 @@ public struct Gesture
     public UnityEvent onRecognized;
     public float Cooldown; //? Cooldown before the gesture can be recognized again ?
     public bool isOnCooldown;
+    public float threshold;
 }
 public class HandGestureDetection : MonoBehaviour
 {
     [SerializeField] private HoloPlayerManager holoPlayerManager;
     
     [SerializeField] private Transform cursor;
+    private LineRenderer lineRenderer;
     public Transform HandTransform;
     [SerializeField] private Transform thumbUpHeart;
     
-    private HandsSubsystem handsSubsystem;
-    //private MRTKRayInteractor rayInteractor;
-    
     public XRNode handNode;
+    [SerializeField] private float indexThreshold;
+    private HandsSubsystem handsSubsystem;
     private const int fingerCount = 26;
+    private bool isPointing;
     
-    public float threshold = 0.1f;
     public List<Gesture> gestureList;
     private Gesture previousGesture;
+    [Header("RayConfig")]
+    [SerializeField] private float rayWidth = 0.0005f;
 
     private void Awake()
     {
-        //rayInteractor = GetComponentInChildren<MRTKRayInteractor>();
+        lineRenderer = GetComponent<LineRenderer>();
+        if (lineRenderer == null)
+            lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.startWidth = rayWidth;
+        lineRenderer.endWidth = rayWidth;
+        lineRenderer.positionCount = 2;
+        lineRenderer.enabled = false;
+        
         if (HandTransform == null)
             HandTransform = transform;
         previousGesture = new Gesture();
@@ -61,19 +69,32 @@ public class HandGestureDetection : MonoBehaviour
     
     private void Update()
     {
-        //! TMP: Allow to make more gestures
+#if UNITY_EDITOR
+        //Allow to make more gestures, once your gestures are saved you can configure them in the inspector
         if (Input.GetKeyDown(KeyCode.Space))
             SaveGesture();
-        //! TMP
-        
+#endif
         // Query all joints in the hand.
-        if (handsSubsystem == null || !handsSubsystem.TryGetEntireHand(handNode, out IReadOnlyList<HandJointPose> joints))
-            return;
+        bool tryGetEntireHand = handsSubsystem.TryGetEntireHand(handNode, out IReadOnlyList<HandJointPose> joints);
+        PrintVar.print(0, $"tryGetEntireHand: {tryGetEntireHand}", $"joints? {joints == null}");
+        if (joints != null)
+            PrintVar.print(1, $"joints: {joints.Count}", $"IndexExtended: {IndexExtended(joints)}", $"IndexTip: {joints[(int)TrackedHandJoint.IndexTip].Position}", $"IndexPrx: {joints[(int)TrackedHandJoint.IndexProximal].Position}", $"Extention: {joints[(int)TrackedHandJoint.IndexProximal].Position - joints[(int)TrackedHandJoint.IndexTip].Position}");
+        if (handsSubsystem == null || !tryGetEntireHand || joints == null)
+            return; // joints[(int)HandJointKind.IndexTip] to get the position of the index finger tip from it
+        if (IndexExtended(joints) && Pointing(joints[(int)TrackedHandJoint.IndexProximal].Position, joints[(int)TrackedHandJoint.IndexTip].Position, out Vector3 point))
+        {
+            lineRenderer.SetPosition(0, joints[(int)TrackedHandJoint.IndexProximal].Position);
+            lineRenderer.SetPosition(1, point);
+            
+            lineRenderer.enabled = true;
+        }
+        else
+            lineRenderer.enabled = false;
         
         Gesture currentGesture = Recognize(joints);
-        bool hasRecognised = !currentGesture.Equals(new());
+        bool hasRecognised = !currentGesture.Equals(new Gesture());
         
-        if (hasRecognised && !currentGesture.Equals(previousGesture) && !currentGesture.isOnCooldown)
+        if (hasRecognised) // && !currentGesture.Equals(previousGesture))
         {
             Debug.Log($"Gesture recognized: {currentGesture.name}");
             currentGesture.onRecognized?.Invoke();
@@ -81,20 +102,27 @@ public class HandGestureDetection : MonoBehaviour
             StartCoroutine(SetOnCooldown(currentGesture));
         }
     }
-
+    
+    private bool IndexExtended(IReadOnlyList<HandJointPose> joints)
+    {
+        return joints[(int)TrackedHandJoint.IndexProximal].Position.x - joints[(int)TrackedHandJoint.IndexTip].Position.x  > indexThreshold;
+    }
+    
     private Gesture Recognize(IReadOnlyList<HandJointPose> joints)
     {
         Gesture currentGesture = new ();
         float currentMin = Mathf.Infinity;
         foreach (var gesture in gestureList)
         {
+            if (gesture.isOnCooldown)
+                continue;
             float sumDistance = 0;
             bool isDiscarted = false;
             for (int i = 0; i < fingerCount; i++)
             {
                 Vector3 currentData = HandTransform.InverseTransformPoint(joints[i].Position);
                 float distance = Vector3.Distance(currentData, gesture.fingerDatas[i]);
-                if (distance > threshold)
+                if (distance > gesture.threshold)
                 {
                     isDiscarted = true;
                     break;
@@ -116,23 +144,23 @@ public class HandGestureDetection : MonoBehaviour
         yield return new WaitForSeconds(gesture.Cooldown);
         gesture.isOnCooldown = false;
     }
-    
-    public void Pointing()
+
+    public bool Pointing(Vector3 start, Vector3 end, out Vector3 cursorPos)
     {
-        if (!handsSubsystem.TryGetJoint(TrackedHandJoint.IndexTip, handNode, out HandJointPose indexTip)
-            || !handsSubsystem.TryGetJoint(TrackedHandJoint.IndexProximal, handNode, out HandJointPose indexBase))
-            return;
-        Ray ray = new Ray(indexBase.Position, indexTip.Position - indexBase.Position);
-        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
-        if (!hit.collider.gameObject.CompareTag("Board")) return;
+        cursorPos = Vector3.zero;
+        Ray ray = new Ray(start, end - start);
+        if (!Physics.Raycast(ray, out RaycastHit hit)) return false;
+        if (!hit.collider.gameObject.CompareTag("Board")) return false;
         // move cursor to hit position
         cursor.position = hit.point;
+        cursorPos = hit.point;
+        return true;
     }
-    
+
     public void PointingPing()
     {
-        if (!cursor.gameObject.activeSelf) // if cursor not already set
-            Pointing();
+        //if (!cursor.gameObject.activeSelf) // if cursor not already set
+        //    Pointing();
         holoPlayerManager.Ping(cursor.position);
     }
     
@@ -142,7 +170,7 @@ public class HandGestureDetection : MonoBehaviour
         thumbUpHeart.position = handsSubsystem.TryGetJoint(TrackedHandJoint.ThumbTip, handNode, out HandJointPose thumbTipPose) ? thumbTipPose.Position : HandTransform.position;
         thumbUpHeart.gameObject.SetActive(true);
     }
-    
+#if UNITY_EDITOR
     public void SaveGesture()
     {
         Debug.Log("Try get new gesture"); 
@@ -154,4 +182,5 @@ public class HandGestureDetection : MonoBehaviour
         gestureList.Add(new Gesture {name = "NewGesture", fingerDatas = data});
         Debug.Log("New gesture saved");
     }
+#endif
 }

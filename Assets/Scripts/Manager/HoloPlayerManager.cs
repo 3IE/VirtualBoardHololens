@@ -6,6 +6,7 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
 {
     private EventManager eventManager;
     private AppManager appManager;
+    public HandGestureDetection handGestureDetection;
     
     private bool Free;
     
