@@ -24,7 +24,7 @@ public class HandGestureDetection : MonoBehaviour
     
     [SerializeField] private Transform cursor;
     private LineRenderer lineRenderer;
-    public Transform HandTransform;
+    private Transform HandTransform;
     [SerializeField] private Transform thumbUpHeart;
     
     public XRNode handNode;
