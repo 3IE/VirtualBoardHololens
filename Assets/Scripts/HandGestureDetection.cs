@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR;
 
-[System.Serializable]
+[Serializable]
 public struct Gesture
 {
     public string name;
@@ -28,7 +29,10 @@ public class HandGestureDetection : MonoBehaviour
     
     public XRNode handNode;
     [SerializeField] private float indexThreshold;
+    [SerializeField] private float alignThreshold;
+    
     private HandsSubsystem handsSubsystem;
+    private Transform headPosition;
     private const int fingerCount = 26;
     private bool isPointing;
     
@@ -50,6 +54,8 @@ public class HandGestureDetection : MonoBehaviour
         if (HandTransform == null)
             HandTransform = transform;
         previousGesture = new Gesture();
+        
+        headPosition = Camera.main ? Camera.main.transform : throw new Exception("No camera found ?!");
     }
 
     protected void OnEnable()
@@ -76,15 +82,27 @@ public class HandGestureDetection : MonoBehaviour
 #endif
         // Query all joints in the hand.
         bool tryGetEntireHand = handsSubsystem.TryGetEntireHand(handNode, out IReadOnlyList<HandJointPose> joints);
-        PrintVar.print(0, $"tryGetEntireHand: {tryGetEntireHand}", $"joints? {joints == null}");
-        if (joints != null)
-            PrintVar.print(1, $"joints: {joints.Count}", $"IndexExtended: {IndexExtended(joints)}", $"IndexTip: {joints[(int)TrackedHandJoint.IndexTip].Position}", $"IndexPrx: {joints[(int)TrackedHandJoint.IndexProximal].Position}", $"Extention: {joints[(int)TrackedHandJoint.IndexProximal].Position - joints[(int)TrackedHandJoint.IndexTip].Position}");
+        //PrintVar.print(0, $"tryGetEntireHand: {tryGetEntireHand}", $"joints? {joints == null}");
+        
+        //if (joints != null) //! TMP
+        //    PrintVar.print(1, $"joints: {joints.Count}"
+        //        , $"IndexExtended: {IndexExtended(joints)}"
+        //        , $"IndexTip: {joints[(int)TrackedHandJoint.IndexTip].Position}"
+        //        , $"IndexPrx: {joints[(int)TrackedHandJoint.IndexProximal].Position}"
+        //        , $"Extention: {joints[(int)TrackedHandJoint.IndexProximal].Position - joints[(int)TrackedHandJoint.IndexTip].Position}"
+        //        , $"Distance: {Vector3.Distance(joints[(int)TrackedHandJoint.IndexProximal].Position, joints[(int)TrackedHandJoint.IndexTip].Position)}"
+        //        , $"Angle: {Vector3.Angle(joints[(int)TrackedHandJoint.IndexTip].Position - joints[(int)TrackedHandJoint.IndexProximal].Position, headPosition.position - joints[(int)TrackedHandJoint.IndexProximal].Position)}");
+        
         if (handsSubsystem == null || !tryGetEntireHand || joints == null)
             return; // joints[(int)HandJointKind.IndexTip] to get the position of the index finger tip from it
-        if (IndexExtended(joints) && Pointing(joints[(int)TrackedHandJoint.IndexProximal].Position, joints[(int)TrackedHandJoint.IndexTip].Position, out Vector3 point))
+        if (IndexExtended(joints))
         {
+            var start = IndexHeadAligned(joints) ? headPosition.position : joints[(int)TrackedHandJoint.IndexProximal].Position;
+            var end = IndexHeadAligned(joints) ? joints[(int)TrackedHandJoint.IndexProximal].Position : joints[(int)TrackedHandJoint.IndexTip].Position;
+            if (!Pointing(start, end)) return;
+            
             lineRenderer.SetPosition(0, joints[(int)TrackedHandJoint.IndexProximal].Position);
-            lineRenderer.SetPosition(1, point);
+            lineRenderer.SetPosition(1, cursor.position);
             
             lineRenderer.enabled = true;
         }
@@ -104,8 +122,14 @@ public class HandGestureDetection : MonoBehaviour
     }
     
     private bool IndexExtended(IReadOnlyList<HandJointPose> joints)
+        => Vector3.Distance(joints[(int)TrackedHandJoint.IndexProximal].Position, 
+               joints[(int)TrackedHandJoint.IndexTip].Position) > indexThreshold;
+    
+    private bool IndexHeadAligned(IReadOnlyList<HandJointPose> joints)
     {
-        return joints[(int)TrackedHandJoint.IndexProximal].Position.x - joints[(int)TrackedHandJoint.IndexTip].Position.x  > indexThreshold;
+        var IndexTip = joints[(int)TrackedHandJoint.IndexTip].Position;
+        var IndexProx = joints[(int)TrackedHandJoint.IndexProximal].Position;
+        return Vector3.Angle(IndexTip - headPosition.position, IndexProx - headPosition.position) > alignThreshold;
     }
     
     private Gesture Recognize(IReadOnlyList<HandJointPose> joints)
@@ -145,15 +169,13 @@ public class HandGestureDetection : MonoBehaviour
         gesture.isOnCooldown = false;
     }
 
-    public bool Pointing(Vector3 start, Vector3 end, out Vector3 cursorPos)
+    public bool Pointing(Vector3 start, Vector3 end)
     {
-        cursorPos = Vector3.zero;
         Ray ray = new Ray(start, end - start);
         if (!Physics.Raycast(ray, out RaycastHit hit)) return false;
         if (!hit.collider.gameObject.CompareTag("Board")) return false;
         // move cursor to hit position
         cursor.position = hit.point;
-        cursorPos = hit.point;
         return true;
     }
 
