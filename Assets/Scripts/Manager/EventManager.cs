@@ -16,12 +16,12 @@ public class EventManager : MonoBehaviour
     {
         var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
 
-        PhotonNetwork.RaiseEvent((byte) Utils.Event.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
+        PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
     }
     public void SendNewPositionEvent()
     {
         var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
 
-        PhotonNetwork.RaiseEvent((byte) Utils.Event.EventCode.SendNewPosition, appManager.CamTransform.position - appManager.BoardTransform.position, raiseEventOptions, SendOptions.SendUnreliable);
+        PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPosition, appManager.CamTransform.position - appManager.BoardTransform.position, raiseEventOptions, SendOptions.SendUnreliable);
     }
 }

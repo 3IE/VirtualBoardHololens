@@ -6,7 +6,6 @@ using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
-using Event = Utils.Event;
 
 public class AppManager : MonoBehaviourPunCallbacks
 {
@@ -136,7 +135,7 @@ public class AppManager : MonoBehaviourPunCallbacks
         PlayerList = new Dictionary<int, GameObject>();
         
         GetAllPlayerInRoom();
-        PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPlayerIn,  CamTransform.position - BoardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
+        PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPlayerIn,  CamTransform.position - BoardTransform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
         
         InvokeRepeating(nameof(SendNewPosition) , _refreshRate, _refreshRate);
         _inputManager.InSession(true);
@@ -228,9 +227,9 @@ public class AppManager : MonoBehaviourPunCallbacks
     {
         byte eventCode = photonEvent.Code;
         //print($"Code received: {photonEvent.Code}\t{photonEvent.CustomData}");
-        switch ((Event.EventCode)eventCode)
+        switch ((Utils.EventCode)eventCode)
         {
-            case Event.EventCode.SendNewPostIt:
+            case Utils.EventCode.SendNewPostIt:
                 var data = (object[]) photonEvent.CustomData;
                 var postItPos = (Vector2) data[0];
                 var text = (string) data[1];
@@ -239,12 +238,12 @@ public class AppManager : MonoBehaviourPunCallbacks
                     new Vector3(boardPos.x + postItPos.x, boardPos.y + postItPos.y, boardPos.z)
                     , text, Color.cyan); // On verra plus tard pour que la couleur varie en fc du joueur
                 break;
-            case Event.EventCode.SendNewPosition:
+            case Utils.EventCode.SendNewPosition:
                 if (!PlayerList.ContainsKey(photonEvent.Sender))
                     return;
                 MoveOverTime(photonEvent.Sender, (Vector3) photonEvent.CustomData);
                 break;
-            case Event.EventCode.SendNewPing:
+            case Utils.EventCode.SendNewPing:
                 OnlinePing((Vector2) photonEvent.CustomData);
                 break;
         }
