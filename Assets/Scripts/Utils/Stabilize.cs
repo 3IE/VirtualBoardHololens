@@ -18,5 +18,4 @@ public class Stabilize : MonoBehaviour
         var transformRotation = transform.rotation.eulerAngles;
         transform.rotation = Quaternion.Euler(0, transformRotation.y, transformRotation.z);
     }
-    
 }

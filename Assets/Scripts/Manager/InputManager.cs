@@ -4,15 +4,11 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour
 {
     private HoloInput holoInput;
-    private AppManager _appManager;
     private Vector2 startPosition;
     private void Awake() {
         holoInput = new HoloInput();
-        _appManager = GetComponent<AppManager>();
     }
-    private void Start()
-    {
-    }
+    
     //public void SettingUpBoard(bool state)
     //{
     //    if (state)

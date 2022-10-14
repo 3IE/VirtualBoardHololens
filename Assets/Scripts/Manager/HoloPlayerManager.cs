@@ -19,8 +19,10 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
     public void Action(Vector2 positionOnScreen, InputManager.actionType actionType) 
     {
         if (!Free) return;
-        // get ray from hand
+        
+        //TODO get ray from hand
         Ray ray = new Ray();
+        
         if (!Physics.Raycast(ray, out RaycastHit hit)) return;
         
         var hitObj = hit.collider.gameObject;
@@ -43,6 +45,4 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
         var localPos = ping.transform.localPosition;
         eventManager.SendNewPingEvent(new Vector2(localPos.x, localPos.y));
     }
-    
-    
 }
