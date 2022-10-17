@@ -1,12 +1,16 @@
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
     private HoloInput holoInput;
-    private Vector2 startPosition;
-    private void Awake() {
+    private HoloPlayerManager holoPlayerManager;
+    [SerializeField] private MRTKRayInteractor RayInteractor;
+    private void Awake()
+    {
         holoInput = new HoloInput();
+        holoPlayerManager = GetComponent<HoloPlayerManager>();
     }
     
     //public void SettingUpBoard(bool state)
@@ -40,7 +44,10 @@ public class InputManager : MonoBehaviour
     }
     private void Ping(InputAction.CallbackContext ctx)
     {
-        //_appManager.Action(startPosition, actionType.Ping);
+        Debug.DrawRay(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward * 10, Color.red, 5);
+        if (!Physics.Raycast(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward, out var hit)) return;
+        if (!hit.collider.CompareTag("Board")) return;
+        holoPlayerManager.Action(hit.textureCoord, actionType.Ping);
     }
     public enum actionType : byte {
         Ping,

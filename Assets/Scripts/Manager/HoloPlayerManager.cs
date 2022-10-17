@@ -20,14 +20,6 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
     {
         if (!Free) return;
         
-        //TODO get ray from hand
-        Ray ray = new Ray();
-        
-        if (!Physics.Raycast(ray, out RaycastHit hit)) return;
-        
-        var hitObj = hit.collider.gameObject;
-
-        if (!hitObj.CompareTag("Board")) return;
         switch (actionType)
         {
             case InputManager.actionType.Ping: 
