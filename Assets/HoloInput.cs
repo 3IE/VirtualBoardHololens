@@ -28,12 +28,21 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
             ""id"": ""e8d9ce51-3f25-4a2e-bda4-a2120c61ab08"",
             ""actions"": [
                 {
-                    ""name"": ""PinchRight"",
+                    ""name"": ""PinchRightHold"",
                     ""type"": ""Button"",
                     ""id"": ""9f8da4d8-4f52-4927-998b-964b6ee7c282"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold(duration=0.6)"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PinchRightTap"",
+                    ""type"": ""Button"",
+                    ""id"": ""7ead7d95-36ba-45f9-b1ac-7015af6393e5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""MultiTap"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -54,7 +63,7 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinchRight"",
+                    ""action"": ""PinchRightHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -68,6 +77,17 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
                     ""action"": ""SqeezeRight"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6fbbeae0-2101-4fcd-98ec-97bbf73059d8"",
+                    ""path"": ""<HololensHand>{RightHand}/selectPressed"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinchRightTap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -76,7 +96,8 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
 }");
         // Hololens
         m_Hololens = asset.FindActionMap("Hololens", throwIfNotFound: true);
-        m_Hololens_PinchRight = m_Hololens.FindAction("PinchRight", throwIfNotFound: true);
+        m_Hololens_PinchRightHold = m_Hololens.FindAction("PinchRightHold", throwIfNotFound: true);
+        m_Hololens_PinchRightTap = m_Hololens.FindAction("PinchRightTap", throwIfNotFound: true);
         m_Hololens_SqeezeRight = m_Hololens.FindAction("SqeezeRight", throwIfNotFound: true);
     }
 
@@ -137,13 +158,15 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
     // Hololens
     private readonly InputActionMap m_Hololens;
     private IHololensActions m_HololensActionsCallbackInterface;
-    private readonly InputAction m_Hololens_PinchRight;
+    private readonly InputAction m_Hololens_PinchRightHold;
+    private readonly InputAction m_Hololens_PinchRightTap;
     private readonly InputAction m_Hololens_SqeezeRight;
     public struct HololensActions
     {
         private @HoloInput m_Wrapper;
         public HololensActions(@HoloInput wrapper) { m_Wrapper = wrapper; }
-        public InputAction @PinchRight => m_Wrapper.m_Hololens_PinchRight;
+        public InputAction @PinchRightHold => m_Wrapper.m_Hololens_PinchRightHold;
+        public InputAction @PinchRightTap => m_Wrapper.m_Hololens_PinchRightTap;
         public InputAction @SqeezeRight => m_Wrapper.m_Hololens_SqeezeRight;
         public InputActionMap Get() { return m_Wrapper.m_Hololens; }
         public void Enable() { Get().Enable(); }
@@ -154,9 +177,12 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
         {
             if (m_Wrapper.m_HololensActionsCallbackInterface != null)
             {
-                @PinchRight.started -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRight;
-                @PinchRight.performed -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRight;
-                @PinchRight.canceled -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRight;
+                @PinchRightHold.started -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightHold;
+                @PinchRightHold.performed -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightHold;
+                @PinchRightHold.canceled -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightHold;
+                @PinchRightTap.started -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightTap;
+                @PinchRightTap.performed -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightTap;
+                @PinchRightTap.canceled -= m_Wrapper.m_HololensActionsCallbackInterface.OnPinchRightTap;
                 @SqeezeRight.started -= m_Wrapper.m_HololensActionsCallbackInterface.OnSqeezeRight;
                 @SqeezeRight.performed -= m_Wrapper.m_HololensActionsCallbackInterface.OnSqeezeRight;
                 @SqeezeRight.canceled -= m_Wrapper.m_HololensActionsCallbackInterface.OnSqeezeRight;
@@ -164,9 +190,12 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
             m_Wrapper.m_HololensActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @PinchRight.started += instance.OnPinchRight;
-                @PinchRight.performed += instance.OnPinchRight;
-                @PinchRight.canceled += instance.OnPinchRight;
+                @PinchRightHold.started += instance.OnPinchRightHold;
+                @PinchRightHold.performed += instance.OnPinchRightHold;
+                @PinchRightHold.canceled += instance.OnPinchRightHold;
+                @PinchRightTap.started += instance.OnPinchRightTap;
+                @PinchRightTap.performed += instance.OnPinchRightTap;
+                @PinchRightTap.canceled += instance.OnPinchRightTap;
                 @SqeezeRight.started += instance.OnSqeezeRight;
                 @SqeezeRight.performed += instance.OnSqeezeRight;
                 @SqeezeRight.canceled += instance.OnSqeezeRight;
@@ -176,7 +205,8 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
     public HololensActions @Hololens => new HololensActions(this);
     public interface IHololensActions
     {
-        void OnPinchRight(InputAction.CallbackContext context);
+        void OnPinchRightHold(InputAction.CallbackContext context);
+        void OnPinchRightTap(InputAction.CallbackContext context);
         void OnSqeezeRight(InputAction.CallbackContext context);
     }
 }

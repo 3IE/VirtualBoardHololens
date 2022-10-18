@@ -5,7 +5,6 @@ namespace Board
 {
     public class FingerMarker : MonoBehaviour
     {
-        private HandGestureDetection _handGestureDetection;
         private PokeInteractor _pokeInteractor;
         private Transform _boardTransform;
         private Marker _marker;
@@ -18,17 +17,8 @@ namespace Board
             _boardTransform = FindObjectOfType<Board>().transform;
             _marker = _boardTransform.GetComponent<Marker>();
             _pokeInteractor = GetComponentInChildren<PokeInteractor>();
-            _handGestureDetection = GetComponent<HandGestureDetection>();
         }
         
-        private void Start()
-        {  //! for debug
-            sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.SetPositionAndRotation(new Vector3(-1, 1, 1), Quaternion.identity);
-            sphere.transform.lossyScale.Set(0.1f, 0.1f, 0.1f);
-        }
-        
-        //!TMP
         private void Update()
         {
             if (!_isPoking) return;
@@ -39,8 +29,6 @@ namespace Board
             if (!Physics.Raycast(poke, -_boardTransform.up, out var hit)) return;
             //TODO Draw from raycast hit point to the board
             _marker.TryDraw(hit);
-            //! for debug
-            sphere.transform.SetPositionAndRotation(poke, Quaternion.identity);
         }
 
         public void OnActivating() => _isPoking = true;

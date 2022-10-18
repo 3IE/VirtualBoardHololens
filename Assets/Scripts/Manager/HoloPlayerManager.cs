@@ -1,4 +1,5 @@
 using System;
+using Microsoft.MixedReality.Toolkit.Input;
 using Photon.Pun;
 using UnityEngine;
 
@@ -7,8 +8,8 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
     private EventManager eventManager;
     private AppManager appManager;
     public HandGestureDetection handGestureDetection;
-    
-    private bool Free;
+    [SerializeField] private MRTKRayInteractor RayInteractor;
+
     
     private void Awake()
     {
@@ -16,13 +17,17 @@ public class HoloPlayerManager : MonoBehaviourPunCallbacks
         appManager = GetComponent<AppManager>();
     }
     
-    public void Action(Vector2 positionOnScreen, InputManager.actionType actionType) 
+    public void Action(InputManager.actionType actionType) 
     {
-        if (!Free) return;
+        Debug.DrawRay(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward * 10, Color.red, 5);
+        
+        if (!Physics.Raycast(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward, out var hit)) return;
+        if (!hit.collider.CompareTag("Board")) return;
         
         switch (actionType)
         {
-            case InputManager.actionType.Ping: 
+            case InputManager.actionType.Ping:
+                Debug.Log($"Ping");
                 Ping(hit.point);
                 break;
             default:
