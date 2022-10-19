@@ -6,6 +6,7 @@ using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
+using Unity.XR.CoreUtils;
 
 public class AppManager : MonoBehaviourPunCallbacks
 {
@@ -268,7 +269,13 @@ public class AppManager : MonoBehaviourPunCallbacks
     }
     
     #endregion
-
+    
+    public void Recenter()
+    {
+        var XROriginTransform = GetComponentInParent<XROrigin>().transform;
+        CamTransform.parent.SetPositionAndRotation(XROriginTransform.position, XROriginTransform.rotation);
+    }
+    
     public override void OnEnable()
     {
         base.OnEnable();
