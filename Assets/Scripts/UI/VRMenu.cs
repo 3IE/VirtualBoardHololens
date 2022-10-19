@@ -31,6 +31,8 @@ namespace UI
             _objectManipulator = GetComponent<ObjectManipulator>();
         }
 
+        #region throwAway
+
         /// <summary>
         ///     If the menu is thrown with at sufficient speed (>throwThreshold)
         ///     it will fade out and disable itself
@@ -62,6 +64,8 @@ namespace UI
         //    lastPosition = transform.position;
         //    PrintVar.print(9, $"Velocity: {velocity}");
         //}
+        
+        #endregion
 
         /// <summary>
         ///     Opens the menu, reset its inertia
@@ -71,7 +75,8 @@ namespace UI
             StopAllCoroutines();
 
             _objectManipulator.enabled = true;
-
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
             _canvasGroup.alpha = 1;
         }
 
@@ -82,6 +87,8 @@ namespace UI
         {
             StopAllCoroutines();
             _objectManipulator.enabled = false;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
         }
 
         /// <summary>

@@ -25,11 +25,20 @@ public class HandMenu : MonoBehaviour
             currentHoldTime += Time.deltaTime;
             if (currentHoldTime >= holdTime)
             {
-                menu.Open();
+                OpenMenu();
                 currentHoldTime = 0;
             }
         }
         else
             currentHoldTime = 0;
+    }
+    
+    private void OpenMenu()
+    {
+        //? teleport to hand
+        menu.transform.SetPositionAndRotation(HandFaceTransform.position, HandFaceTransform.rotation);
+        menu.transform.localPosition -= menu.transform.right * 0.2f;
+        
+        menu.Open();
     }
 }
