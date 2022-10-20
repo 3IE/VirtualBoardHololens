@@ -3,25 +3,15 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 
-public class EventManager : MonoBehaviour
+namespace Manager
 {
-    private AppManager appManager;
-    
-    private void Start()
+    public class EventManager : MonoBehaviour
     {
-        appManager = GetComponent<AppManager>();
-    }
+        public static void SendNewPingEvent(Vector2 position)
+        {
+            var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
 
-    public void SendNewPingEvent(Vector2 position)
-    {
-        var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-
-        PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
-    }
-    public void SendNewPositionEvent()
-    {
-        var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-
-        PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPosition, appManager.CamTransform.position - appManager.BoardTransform.position, raiseEventOptions, SendOptions.SendUnreliable);
+            PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
+        }
     }
 }

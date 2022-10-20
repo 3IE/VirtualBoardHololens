@@ -10,6 +10,16 @@
         "com.unity.xr.openxr": "1.4.2"
       }
     },
+    "com.microsoft.mrtk.accessibility": {
+      "version": "file:MixedReality/com.microsoft.mrtk.accessibility-1.0.0-pre.11.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.microsoft.mrtk.core": "1.0.0-pre.11",
+        "com.microsoft.mrtk.graphicstools.unity": "0.4.0",
+        "com.unity.textmeshpro": "3.0.6"
+      }
+    },
     "com.microsoft.mrtk.audio": {
       "version": "file:MixedReality/com.microsoft.mrtk.audio-3.0.0-pre.11.tgz",
       "depth": 0,
@@ -139,6 +149,14 @@
         "com.unity.inputsystem": "1.3.0",
         "com.unity.textmeshpro": "3.0.6",
         "com.unity.xr.interaction.toolkit": "2.0.3"
+      }
+    },
+    "com.microsoft.mrtk.windowsspeech": {
+      "version": "file:MixedReality/com.microsoft.mrtk.windowsspeech-3.0.0-pre.11.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.microsoft.mrtk.core": "3.0.0-pre.11"
       }
     },
     "com.unity.collab-proxy": {
