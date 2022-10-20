@@ -1,4 +1,5 @@
 using System;
+using Manager;
 using UnityEngine;
 using Utils;
 
@@ -8,13 +9,13 @@ namespace Board
     public class Marker : WritingTool
     {
         private AppManager _appManager;
-        private Board _board;
-        private Color[] _colors;
+        private Board      _board;
+        private Color[]    _colors;
 
         private Renderer _renderer;
 
         private Transform _tipTransform;
-        private Vector2 _touchPos;
+        private Vector2   _touchPos;
 
         /// <summary>
         ///     Position on the board touched last
@@ -25,8 +26,8 @@ namespace Board
         private void Start()
         {
             _appManager = GetComponent<AppManager>();
-            _board = _appManager.BoardTransform.GetComponentInChildren<Board>();
-            _renderer = _appManager.BoardTransform.GetComponentInChildren<Renderer>();
+            _board      = _appManager.BoardTransform.GetComponentInChildren<Board>();
+            _renderer   = _appManager.BoardTransform.GetComponentInChildren<Renderer>();
 
             TouchedLast = false;
         }
@@ -61,8 +62,8 @@ namespace Board
             // We check if we are touching the board with the marker
             if (_touch.transform.CompareTag("Board"))
             {
-                _board ??= _touch.transform.GetComponent<Board>();
-                _touchPos = new Vector2(_touch.textureCoord.x, _touch.textureCoord.y);
+                _board    ??= _touch.transform.GetComponent<Board>();
+                _touchPos =   new Vector2(_touch.textureCoord.x, _touch.textureCoord.y);
 
                 var x = (int) (_touchPos.x * _board.textureSize.x - penSize / 2);
                 var y = (int) (_touchPos.y * _board.textureSize.y - penSize / 2);
@@ -70,6 +71,7 @@ namespace Board
                 // If we are touching the board and in its boundaries, then we draw
                 PrintVar.print(1, $"position: {x}  {y}");
                 PrintVar.print(3, $"InBound: {InBound(x, y)}");
+
                 if (!InBound(x, y))
                     return false;
 
@@ -80,14 +82,12 @@ namespace Board
 
                     try
                     {
-                        ModifyTexture(x, y, LastTouchPos.x,
-                            LastTouchPos.y, _colors, penSize);
-                    }
-                    catch (ArgumentException)
+                        ModifyTexture(x,              y,       LastTouchPos.x,
+                                      LastTouchPos.y, _colors, penSize);
+                    } catch (ArgumentException)
                     {
                         TouchedLast = false;
-                    }
-                    finally
+                    } finally
                     {
                         SendModification(x, y);
 
@@ -99,12 +99,12 @@ namespace Board
                     _colors = GenerateShape();
 
                 LastTouchPos = new Vector2(x, y);
-                TouchedLast = true;
+                TouchedLast  = true;
 
                 return true;
             }
 
-            _board = null;
+            _board      = null;
             TouchedLast = false;
 
             return false;
@@ -129,8 +129,8 @@ namespace Board
         private void SendModification(int x, int y)
         {
             new Modification(x, y, LastTouchPos.x,
-                    LastTouchPos.y, _renderer.material.color,
-                    penSize)
+                             LastTouchPos.y, _renderer.material.color,
+                             penSize)
                 .Send(EventCode.Marker);
         }
 
@@ -143,16 +143,16 @@ namespace Board
         /// <param name="destY"> y coordinate of the ending point </param>
         /// <param name="colors"> color array to apply at each step between the two points </param>
         /// <param name="size"> size of the array </param>
-        private static void ModifyTexture(int x, int y, float destX,
-            float destY, Color[] colors, float size)
+        private static void ModifyTexture(int   x,     int     y,      float destX,
+                                          float destY, Color[] colors, float size)
         {
             var castSize = (int) size;
 
             Board.Instance.texture.SetPixels(x, y, castSize,
-                castSize, colors);
+                                             castSize, colors);
 
             Board.Instance.texture.SetPixels((int) destX, (int) destY, castSize,
-                castSize, colors);
+                                             castSize, colors);
 
             // Interpolation
             for (var f = 0.01f; f < 1.00f; f += Tools.Instance.coverage)
@@ -161,7 +161,7 @@ namespace Board
                 var lerpY = (int) Mathf.Lerp(destY, y, f);
 
                 Board.Instance.texture.SetPixels(lerpX, lerpY, castSize,
-                    castSize, colors);
+                                                 castSize, colors);
             }
         }
 
@@ -173,9 +173,9 @@ namespace Board
         {
             Color[] colors = Tools.GenerateSquare(modification.Color, penSize);
 
-            ModifyTexture(modification.X, modification.Y, modification.DestX,
-                modification.DestY, colors,
-                modification.PenSize);
+            ModifyTexture(modification.X,     modification.Y, modification.DestX,
+                          modification.DestY, colors,
+                          modification.PenSize);
         }
 
         /// <summary>

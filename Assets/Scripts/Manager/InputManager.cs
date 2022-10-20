@@ -1,46 +1,49 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviour
+namespace Manager
 {
-    private HoloInput holoInput;
-    private HoloPlayerManager holoPlayerManager;
-    private void Awake()
+    public class InputManager : MonoBehaviour
     {
-        holoInput = new HoloInput();
-        holoPlayerManager = GetComponent<HoloPlayerManager>();
+        private HoloInput         _holoInput;
+        private HoloPlayerManager _holoPlayerManager;
+        private void Awake()
+        {
+            _holoInput         = new HoloInput();
+            _holoPlayerManager = GetComponent<HoloPlayerManager>();
         
-        //!TMP
-        InSession(true);
-    }
-    
-    public void InSession(bool state)
-    {
-        if (state)
-        {
-            holoInput.Hololens.PinchRightTap.performed += Ping;
-            holoInput.Hololens.PinchRightHold.performed += PostIt;
+            //!TMP
+            InSession(true);
         }
-        else
+    
+        public void InSession(bool state)
         {
-            holoInput.Hololens.PinchRightTap.performed -= Ping;
-            holoInput.Hololens.PinchRightHold.performed -= PostIt;
+            if (state)
+            {
+                _holoInput.Hololens.PinchRightTap.performed  += Ping;
+                _holoInput.Hololens.PinchRightHold.performed += PostIt;
+            }
+            else
+            {
+                _holoInput.Hololens.PinchRightTap.performed  -= Ping;
+                _holoInput.Hololens.PinchRightHold.performed -= PostIt;
+            }
         }
+    
+        private void PostIt(InputAction.CallbackContext ctx)
+        {
+            Debug.Log($"Post-It");
+        }
+    
+        private void Ping(InputAction.CallbackContext ctx)
+            => _holoPlayerManager.Action(ActionType.Ping);
+    
+        public enum ActionType : byte {
+            Ping,
+            PostIt,
+        }
+    
+        private void OnEnable()  => _holoInput.Enable();
+        private void OnDisable() => _holoInput.Disable();
     }
-    
-    private void PostIt(InputAction.CallbackContext ctx)
-    {
-        Debug.Log($"Post-It");
-    }
-    
-    private void Ping(InputAction.CallbackContext ctx)
-        => holoPlayerManager.Action(actionType.Ping);
-    
-    public enum actionType : byte {
-        Ping,
-        Postit
-    }
-    
-    private void OnEnable() => holoInput.Enable();
-    private void OnDisable() => holoInput.Disable();
 }

@@ -57,6 +57,8 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.microsoft.mrtk.accessibility": "file:MixedReality/com.microsoft.mrtk.accessibility-1.0.0-pre.11.tgz",
+    "com.microsoft.mrtk.windowsspeech": "file:MixedReality/com.microsoft.mrtk.windowsspeech-3.0.0-pre.11.tgz"
   }
 }

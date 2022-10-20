@@ -14,7 +14,7 @@ public class Modification
     public readonly int   Y;
 
     public Modification(int   x,     int   y,     float destX,
-        float destY, Color color, float penSize)
+                        float destY, Color color, float penSize)
     {
         X       = x;
         Y       = y;
@@ -39,7 +39,7 @@ public class Modification
 
     internal void Send(EventCode code)
     {
-        float[] colors = new[] { Color.r, Color.g, Color.b };
+        float[] colors = { Color.r, Color.g, Color.b };
 
         object[] content = { X, Y, DestX, DestY, colors, PenSize };
 
@@ -48,6 +48,6 @@ public class Modification
 
         // We send the event
         PhotonNetwork.RaiseEvent((byte) code, content, raiseEventOptions,
-            SendOptions.SendReliable);
+                                 SendOptions.SendReliable);
     }
 }

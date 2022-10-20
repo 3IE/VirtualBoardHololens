@@ -2,44 +2,55 @@ using System;
 using Microsoft.MixedReality.Toolkit.Input;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class HoloPlayerManager : MonoBehaviourPunCallbacks
+namespace Manager
 {
-    private EventManager eventManager;
-    private AppManager appManager;
-    public HandGestureDetection handGestureDetection;
-    [SerializeField] private MRTKRayInteractor RayInteractor;
+    public class HoloPlayerManager : MonoBehaviourPunCallbacks
+    {
+        private EventManager         _eventManager;
+        private AppManager           _appManager;
+        public  HandGestureDetection handGestureDetection;
 
-    
-    private void Awake()
-    {
-        eventManager = GetComponent<EventManager>();
-        appManager = GetComponent<AppManager>();
-    }
-    
-    public void Action(InputManager.actionType actionType) 
-    {
-        Debug.DrawRay(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward * 10, Color.red, 5);
-        
-        if (!Physics.Raycast(RayInteractor.rayOriginTransform.position, RayInteractor.rayOriginTransform.forward, out var hit)) return;
-        if (!hit.collider.CompareTag("Board")) return;
-        
-        switch (actionType)
+        [FormerlySerializedAs("RayInteractor")]
+        [SerializeField]
+        private MRTKRayInteractor rayInteractor;
+
+
+        private void Awake()
         {
-            case InputManager.actionType.Ping:
-                Debug.Log($"Ping");
-                Ping(hit.point);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
+            _eventManager = GetComponent<EventManager>();
+            _appManager   = GetComponent<AppManager>();
         }
-    }
 
-    public void Ping(Vector3 position)
-    {
-        var ping = Instantiate(appManager.localPingPrefab,  position, appManager.BoardTransform.rotation, appManager.BoardTransform);
-        // Send ping Online
-        var localPos = ping.transform.localPosition;
-        eventManager.SendNewPingEvent(new Vector2(localPos.x, localPos.y));
+        public void Action(InputManager.ActionType actionType)
+        {
+            Debug.DrawRay(rayInteractor.rayOriginTransform.position, rayInteractor.rayOriginTransform.forward * 10, Color.red,
+                          5);
+
+            if (!Physics.Raycast(rayInteractor.rayOriginTransform.position, rayInteractor.rayOriginTransform.forward, out var hit)) return;
+            if (!hit.collider.CompareTag("Board")) return;
+
+            switch (actionType)
+            {
+                case InputManager.ActionType.Ping:
+                    Debug.Log($"Ping");
+                    Ping(hit.point);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
+            }
+        }
+
+        public void Ping(Vector3 position)
+        {
+            var ping = Instantiate(_appManager.localPingPrefab, position, _appManager.BoardTransform.rotation,
+                                   _appManager.BoardTransform);
+
+            // Send ping Online
+            var localPos = ping.transform.localPosition;
+            EventManager.SendNewPingEvent(new Vector2(localPos.x, localPos.y));
+        }
     }
 }
