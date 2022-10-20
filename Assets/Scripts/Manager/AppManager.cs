@@ -1,3 +1,4 @@
+using System;
 using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
@@ -175,7 +176,7 @@ namespace Manager
         {
             GameObject ping = Instantiate(onlinePingPrefab, new Vector3(0, -10, 0), BoardTransform.rotation,
                                           board.transform);
-            
+
             ping.transform.localPosition = new Vector3(position.x, position.y, 0);
             pingSearcher.AssignedPing    = ping;
             pingSearcher.gameObject.SetActive(true);
@@ -197,10 +198,10 @@ namespace Manager
         {
             GameObject postIt = Instantiate(postItPrefab, position, BoardTransform.rotation,
                                             board.transform);
-            
+
             postIt.GetComponentInChildren<TMP_Text>().text           = text;
             postIt.GetComponentInChildren<Renderer>().material.color = color;
-            
+
             return postIt;
         }
 
@@ -230,12 +231,42 @@ namespace Manager
             byte eventCode = photonEvent.Code;
 
             //print($"Code received: {photonEvent.Code}\t{photonEvent.CustomData}");
-            switch ((EventCode) eventCode)
+            switch (eventCode)
+            {
+                case < 10:
+                    break;
+
+                case < 20:
+                    OnPlayerEvent((EventCode) eventCode, photonEvent.CustomData);
+                    break;
+
+                case < 30:
+                    OnToolEvent((EventCode) eventCode, photonEvent.CustomData);
+                    break;
+
+                case < 40:
+                    break;
+
+                case >= 200:
+                    break;
+                
+                default:
+                    throw new ArgumentException($"Invalid Code: {eventCode}");
+            }
+        }
+
+        #endregion
+
+        #region PLAYER_EVENTS
+
+        private void OnPlayerEvent(EventCode eventCode, object data)
+        {
+            switch (eventCode)
             {
                 case EventCode.SendNewPostIt:
-                    var     data      = (object[]) photonEvent.CustomData;
-                    var     postItPos = (Vector2) data[0];
-                    var     text      = (string) data[1];
+                    var     dataArr   = (object[]) data;
+                    var     postItPos = (Vector2) dataArr[0];
+                    var     text      = (string) dataArr[1];
                     Vector3 boardPos  = board.transform.position;
 
                     Post_it_Instantiate(
@@ -244,11 +275,38 @@ namespace Manager
                     break;
 
                 case EventCode.SendNewPing:
-                    OnlinePing((Vector2) photonEvent.CustomData);
+                    OnlinePing((Vector2) data);
                     break;
+                
+                default:
+                    throw new ArgumentException($"Invalid Code: {eventCode}");
             }
         }
 
         #endregion
+
+        #region TOOL_EVENTS
+
+        private void OnToolEvent(EventCode eventCode, object data)
+        {
+            switch (eventCode)
+            {
+                case EventCode.Marker:
+                case EventCode.Eraser:
+                    Debug.Log("Marker or Eraser");
+
+                    Board.Board.Instance.AddModification(new Modification(data));
+                    break;
+
+                case EventCode.Texture:
+                    Board.Board.Instance.texture.LoadImage(data as byte[]);
+                    break;
+
+                default:
+                    throw new ArgumentException("Unknown event code");
+            }
+        }
     }
+
+    #endregion
 }
