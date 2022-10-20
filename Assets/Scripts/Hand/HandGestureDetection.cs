@@ -96,7 +96,7 @@ public class HandGestureDetection : MonoBehaviour
         
         if (handsSubsystem == null || !tryGetEntireHand || joints == null)
             return; // joints[(int)HandJointKind.IndexTip] to get the position of the index finger tip from it
-        if (IndexExtended(joints))
+        /*if (IndexExtended(joints))
         {
             var start = IndexHeadAligned(joints) ? headPosition.position : joints[(int)TrackedHandJoint.IndexProximal].Position;
             var end = IndexHeadAligned(joints) ? joints[(int)TrackedHandJoint.IndexProximal].Position : joints[(int)TrackedHandJoint.IndexTip].Position;
@@ -108,7 +108,7 @@ public class HandGestureDetection : MonoBehaviour
             lineRenderer.enabled = true;
         }
         else
-            lineRenderer.enabled = false;
+            lineRenderer.enabled = false;*/
         
         Gesture currentGesture = Recognize(joints);
         bool hasRecognised = !currentGesture.Equals(new Gesture());

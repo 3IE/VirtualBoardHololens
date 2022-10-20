@@ -11,7 +11,7 @@ namespace Manager
     public class AppManager : MonoBehaviourPunCallbacks
     {
         [SerializeField] private MenuSystem menuSystem;
-        [SerializeField] private Camera     cam;
+        private Camera     cam;
 
         [SerializeField] private PingSearcher pingSearcher;
 
@@ -36,6 +36,7 @@ namespace Manager
 
         private void Start()
         {
+            cam = Camera.main;
             _inputManager  = GetComponent<InputManager>();
             _eventManager  = GetComponent<EventManager>();
             _playerManager = GetComponent<HoloPlayerManager>();
