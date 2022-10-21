@@ -1,10 +1,9 @@
 using System;
 using ExitGames.Client.Photon;
-using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
+using Shapes;
 using TMPro;
-using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utils;
@@ -14,7 +13,7 @@ namespace Manager
     public class AppManager : MonoBehaviourPunCallbacks
     {
         [SerializeField] private MenuSystem menuSystem;
-        private Camera     cam;
+        private                  Camera     cam;
 
         [SerializeField] private PingSearcher pingSearcher;
 
@@ -27,13 +26,19 @@ namespace Manager
 
         private Vector2 _touchPos;
 
-        public Transform CamTransform => cam.transform;
+        public Transform CamTransform
+        {
+            get
+            {
+                return cam.transform;
+            }
+        }
 
         public Transform BoardTransform { get; private set; }
 
-        private void Awake()
+        private void Start()
         {
-            cam = Camera.main;
+            cam            = Camera.main;
             _inputManager  = GetComponent<InputManager>();
             _eventManager  = GetComponent<EventManager>();
             _playerManager = GetComponent<HoloPlayerManager>();
@@ -52,12 +57,6 @@ namespace Manager
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
 
-        public void Recenter() //TODO: make it work, it must reset the player's position 
-        {
-            var XROriginTransform = CamTransform.GetComponentInParent<XROrigin>().transform;
-            CamTransform.parent.SetPositionAndRotation(XROriginTransform.position, XROriginTransform.rotation);
-        }
-        
         #region SetupAR
 
         //public IEnumerator SetAnchor(Vector2 positionOnScreen)
@@ -122,10 +121,7 @@ namespace Manager
         {
             Vector3 currentRotation = BoardTransform.rotation.eulerAngles;
             BoardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
-
-            var objComponent = BoardTransform.GetComponent<ObjectManipulator>();
-            objComponent.AllowedManipulations = TransformFlags.None;
-            objComponent.AllowedInteractionTypes = InteractionFlags.None;
+            BoardTransform.GetComponent<ObjectManipulator>().enabled = false;
             menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
         }
 
@@ -249,12 +245,13 @@ namespace Manager
                     OnToolEvent((EventCode) eventCode, photonEvent.CustomData);
                     break;
 
-                case < 40:
+                case < 60:
+                    OnObjectEvent((EventCode) eventCode, photonEvent.CustomData);
                     break;
 
                 case >= 200:
                     break;
-                
+
                 default:
                     throw new ArgumentException($"Invalid Code: {eventCode}");
             }
@@ -282,7 +279,7 @@ namespace Manager
                 case EventCode.SendNewPing:
                     OnlinePing((Vector2) data);
                     break;
-                
+
                 default:
                     throw new ArgumentException($"Invalid Code: {eventCode}");
             }
@@ -311,7 +308,40 @@ namespace Manager
                     throw new ArgumentException("Unknown event code");
             }
         }
+
+        #endregion
         
-        #endregion  
+        #region OBJECT_EVENTS
+
+        private static void OnObjectEvent(EventCode eventCode, object data)
+        {
+            switch (eventCode)
+            {
+                case EventCode.SendNewObject:
+                    Shape.ReceiveNewObject(data as object[]);
+                    break;
+
+                case EventCode.SendDestroy:
+                    Shape.ReceiveDestroy((int) data);
+                    break;
+
+                case EventCode.SendTransform:
+                    Shape.ReceiveTransform(data as object[]);
+                    break;
+
+                case EventCode.SendOwnership:
+                    Shape.ReceiveOwnership(data as object[]);
+                    break;
+
+                case EventCode.SendCounter:
+                    Shape.ReceiveCounter((int) data);
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid event code");
+            }
+        }
+
+        #endregion
     }
 }
