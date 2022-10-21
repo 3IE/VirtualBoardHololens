@@ -2,6 +2,7 @@ using System;
 using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
+using Shapes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,7 +13,7 @@ namespace Manager
     public class AppManager : MonoBehaviourPunCallbacks
     {
         [SerializeField] private MenuSystem menuSystem;
-        private Camera     cam;
+        private                  Camera     cam;
 
         [SerializeField] private PingSearcher pingSearcher;
 
@@ -37,7 +38,7 @@ namespace Manager
 
         private void Start()
         {
-            cam = Camera.main;
+            cam            = Camera.main;
             _inputManager  = GetComponent<InputManager>();
             _eventManager  = GetComponent<EventManager>();
             _playerManager = GetComponent<HoloPlayerManager>();
@@ -244,12 +245,13 @@ namespace Manager
                     OnToolEvent((EventCode) eventCode, photonEvent.CustomData);
                     break;
 
-                case < 40:
+                case < 60:
+                    OnObjectEvent((EventCode) eventCode, photonEvent.CustomData);
                     break;
 
                 case >= 200:
                     break;
-                
+
                 default:
                     throw new ArgumentException($"Invalid Code: {eventCode}");
             }
@@ -277,7 +279,7 @@ namespace Manager
                 case EventCode.SendNewPing:
                     OnlinePing((Vector2) data);
                     break;
-                
+
                 default:
                     throw new ArgumentException($"Invalid Code: {eventCode}");
             }
@@ -306,7 +308,40 @@ namespace Manager
                     throw new ArgumentException("Unknown event code");
             }
         }
-    }
 
-    #endregion
+        #endregion
+        
+        #region OBJECT_EVENTS
+
+        private static void OnObjectEvent(EventCode eventCode, object data)
+        {
+            switch (eventCode)
+            {
+                case EventCode.SendNewObject:
+                    Shape.ReceiveNewObject(data as object[]);
+                    break;
+
+                case EventCode.SendDestroy:
+                    Shape.ReceiveDestroy((int) data);
+                    break;
+
+                case EventCode.SendTransform:
+                    Shape.ReceiveTransform(data as object[]);
+                    break;
+
+                case EventCode.SendOwnership:
+                    Shape.ReceiveOwnership(data as object[]);
+                    break;
+
+                case EventCode.SendCounter:
+                    Shape.ReceiveCounter((int) data);
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid event code");
+            }
+        }
+
+        #endregion
+    }
 }
