@@ -1,8 +1,10 @@
 using System;
 using ExitGames.Client.Photon;
+using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
 using TMPro;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utils;
@@ -25,17 +27,11 @@ namespace Manager
 
         private Vector2 _touchPos;
 
-        public Transform CamTransform
-        {
-            get
-            {
-                return cam.transform;
-            }
-        }
+        public Transform CamTransform => cam.transform;
 
         public Transform BoardTransform { get; private set; }
 
-        private void Start()
+        private void Awake()
         {
             cam = Camera.main;
             _inputManager  = GetComponent<InputManager>();
@@ -56,6 +52,12 @@ namespace Manager
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
 
+        public void Recenter() //TODO: make it work, it must reset the player's position 
+        {
+            var XROriginTransform = CamTransform.GetComponentInParent<XROrigin>().transform;
+            CamTransform.parent.SetPositionAndRotation(XROriginTransform.position, XROriginTransform.rotation);
+        }
+        
         #region SetupAR
 
         //public IEnumerator SetAnchor(Vector2 positionOnScreen)
@@ -120,7 +122,10 @@ namespace Manager
         {
             Vector3 currentRotation = BoardTransform.rotation.eulerAngles;
             BoardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
-            BoardTransform.GetComponent<ObjectManipulator>().enabled = false;
+
+            var objComponent = BoardTransform.GetComponent<ObjectManipulator>();
+            objComponent.AllowedManipulations = TransformFlags.None;
+            objComponent.AllowedInteractionTypes = InteractionFlags.None;
             menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
         }
 
@@ -306,7 +311,7 @@ namespace Manager
                     throw new ArgumentException("Unknown event code");
             }
         }
+        
+        #endregion  
     }
-
-    #endregion
 }

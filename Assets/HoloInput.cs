@@ -42,7 +42,7 @@ public partial class @HoloInput : IInputActionCollection2, IDisposable
                     ""id"": ""7ead7d95-36ba-45f9-b1ac-7015af6393e5"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""MultiTap"",
+                    ""interactions"": ""MultiTap(tapDelay=0.85)"",
                     ""initialStateCheck"": false
                 },
                 {

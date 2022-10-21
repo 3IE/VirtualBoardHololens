@@ -8,7 +8,6 @@ namespace Manager
 {
     public class HoloPlayerManager : MonoBehaviourPunCallbacks
     {
-        private EventManager         _eventManager;
         private AppManager           _appManager;
         public  HandGestureDetection handGestureDetection;
 
@@ -19,7 +18,6 @@ namespace Manager
 
         private void Awake()
         {
-            _eventManager = GetComponent<EventManager>();
             _appManager   = GetComponent<AppManager>();
         }
 

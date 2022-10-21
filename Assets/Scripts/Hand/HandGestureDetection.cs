@@ -39,18 +39,18 @@ public class HandGestureDetection : MonoBehaviour
     
     public List<Gesture> gestureList;
     private Gesture previousGesture;
-    [Header("RayConfig")]
-    [SerializeField] private float rayWidth = 0.0005f;
+    //[Header("RayConfig")]
+    //[SerializeField] private float rayWidth = 0.0005f;
 
     private void Awake()
     {
-        lineRenderer = GetComponent<LineRenderer>();
-        if (lineRenderer == null)
-            lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.startWidth = rayWidth;
-        lineRenderer.endWidth = rayWidth;
-        lineRenderer.positionCount = 2;
-        lineRenderer.enabled = false;
+        // lineRenderer = GetComponent<LineRenderer>();
+        // if (lineRenderer == null)
+        //     lineRenderer = gameObject.AddComponent<LineRenderer>();
+        // lineRenderer.startWidth = rayWidth;
+        // lineRenderer.endWidth = rayWidth;
+        // lineRenderer.positionCount = 2;
+        // lineRenderer.enabled = false;
         
         if (HandTransform == null)
             HandTransform = transform;

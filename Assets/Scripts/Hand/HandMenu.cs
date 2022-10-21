@@ -19,7 +19,6 @@ public class HandMenu : MonoBehaviour
 
     private void Update()
     {
-        PrintVar.print(8, $"Angle: {Mathf.Round(Vector3.Angle(HandFaceTransform.forward, camPosition.position - HandFaceTransform.position))}");
         if (Mathf.Round(Vector3.Angle(HandFaceTransform.forward, camPosition.position - HandFaceTransform.position)) < 30)
         {
             currentHoldTime += Time.deltaTime;

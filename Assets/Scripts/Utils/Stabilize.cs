@@ -16,6 +16,6 @@ public class Stabilize : MonoBehaviour
     {
         transform.LookAt(camTransform);
         var transformRotation = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(0, transformRotation.y, transformRotation.z);
+        transform.rotation = Quaternion.Euler(0, transformRotation.y + 180, transformRotation.z);
     }
 }

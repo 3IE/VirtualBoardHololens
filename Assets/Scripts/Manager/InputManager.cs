@@ -11,9 +11,6 @@ namespace Manager
         {
             _holoInput         = new HoloInput();
             _holoPlayerManager = GetComponent<HoloPlayerManager>();
-        
-            //!TMP
-            InSession(true);
         }
     
         public void InSession(bool state)
@@ -21,12 +18,12 @@ namespace Manager
             if (state)
             {
                 _holoInput.Hololens.PinchRightTap.performed  += Ping;
-                _holoInput.Hololens.PinchRightHold.performed += PostIt;
+                //_holoInput.Hololens.PinchRightHold.performed += PostIt;
             }
             else
             {
                 _holoInput.Hololens.PinchRightTap.performed  -= Ping;
-                _holoInput.Hololens.PinchRightHold.performed -= PostIt;
+               // _holoInput.Hololens.PinchRightHold.performed -= PostIt;
             }
         }
     

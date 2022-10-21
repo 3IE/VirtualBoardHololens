@@ -34,6 +34,7 @@ namespace Board
 
         public void TryDraw(RaycastHit touch)
         {
+            PrintVar.print(5, $"touch: {touch.textureCoord2}");
             Tools.Instance.Modified = Draw(touch) || Tools.Instance.Modified;
         }
 
