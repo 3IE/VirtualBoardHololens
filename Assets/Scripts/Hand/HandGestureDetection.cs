@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Board;
 using Manager;
 using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Subsystems;
@@ -57,6 +58,7 @@ public class HandGestureDetection : MonoBehaviour
         previousGesture = new Gesture();
         
         headPosition = Camera.main ? Camera.main.transform : throw new Exception("No camera found ?!");
+        _fingerMarker = GetComponent<FingerMarker>();
     }
 
     protected void OnEnable()
@@ -192,6 +194,12 @@ public class HandGestureDetection : MonoBehaviour
         //todo holoPlayerManager.ThumbUp();
         thumbUpHeart.position = handsSubsystem.TryGetJoint(TrackedHandJoint.ThumbTip, handNode, out HandJointPose thumbTipPose) ? thumbTipPose.Position : HandTransform.position;
         thumbUpHeart.gameObject.SetActive(true);
+    }
+
+    private FingerMarker _fingerMarker;
+    public void PalmEraser()
+    {
+        _fingerMarker.Erase();
     }
 #if UNITY_EDITOR
     public void SaveGesture()
