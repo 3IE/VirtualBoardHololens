@@ -15,10 +15,12 @@ public struct Gesture
 {
     public string name;
     public List<Vector3> fingerDatas;
-    public UnityEvent onRecognized;
+    public UnityEvent onRecognized; // Event to trigger when the gesture is recognized
+    public UnityEvent onDerecognized; // Event to trigger when the gesture is no longer recognized
+    public bool repeating; // if true, the event will be fired every frame the gesture is recognized
     public float Cooldown; //? Cooldown before the gesture can be recognized again ?
     public bool isOnCooldown;
-    public float threshold;
+    public float threshold; // threshold for the gesture to be recognized
 }
 public class HandGestureDetection : MonoBehaviour
 {
@@ -119,6 +121,7 @@ public class HandGestureDetection : MonoBehaviour
         {
             Debug.Log($"Gesture recognized: {currentGesture.name}");
             currentGesture.onRecognized?.Invoke();
+            previousGesture.onDerecognized?.Invoke();
             previousGesture = currentGesture;
             StartCoroutine(SetOnCooldown(currentGesture));
         }
@@ -197,10 +200,10 @@ public class HandGestureDetection : MonoBehaviour
     }
 
     private FingerMarker _fingerMarker;
-    public void PalmEraser()
-    {
-        _fingerMarker.Erase();
-    }
+    public void PalmEraser() => _fingerMarker.Erase();
+    
+    public void PalmEraserStop() => _fingerMarker.StopErase();
+    
 #if UNITY_EDITOR
     public void SaveGesture()
     {

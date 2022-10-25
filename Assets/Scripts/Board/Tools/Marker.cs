@@ -23,6 +23,9 @@ namespace Board
         private Vector2   _touchPos;
 
         public Color color = Color.blue;
+        private Color boardColor;
+
+        private bool Erasing;
 
         // Start is called before the first frame update
         private void Start()
@@ -32,6 +35,8 @@ namespace Board
             _renderer   = _appManager.BoardTransform.GetComponentInChildren<Renderer>();
             
             TouchedLast = false;
+            Erasing     = false;
+            boardColor  = Board.Instance.texture.GetPixel(0, 0);
         }
 
         public void TryDraw(RaycastHit touch)
@@ -113,6 +118,16 @@ namespace Board
             return false;
         }
 
+        public void Eraser(bool active = true)
+        {
+            if (active == Erasing) return;
+            
+            penSize = active ? penSize * 5 : penSize / 5;
+            color   = active ? boardColor : Color.blue;
+            
+            Erasing = active;
+        }
+        
         /// <summary>
         ///     Generates a color array
         /// </summary>
@@ -190,7 +205,7 @@ namespace Board
             ModifyTexture(modification);
             Tools.Instance.Modified = true;
         }
-
+        
         // TODO add other shapes ?
     }
 }

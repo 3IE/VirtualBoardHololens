@@ -23,6 +23,7 @@ namespace Board
         private void Update()
         {
             //if (!_isPoking) return;
+            if (erasing) return;
             
             Vector3 indexTipBack = new (_indexTipTransform.position.x, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.1f);
             if (!Physics.Raycast(indexTipBack, _indexTipTransform.forward, out RaycastHit hit, 0.2f, LayerMask.GetMask("Board")))
@@ -36,10 +37,14 @@ namespace Board
             }
         }
 
+        private bool erasing = false;
         public void Erase()
         {
-            Vector3 indexTipBack = new (_indexTipTransform.position.x + 0.2f, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.5f);
-            if (!Physics.Raycast(indexTipBack, -_indexTipTransform.up, out RaycastHit hit, 2f, LayerMask.GetMask("Board")))
+            erasing = true;
+            _marker.Eraser(true);
+            
+            Vector3 indexTipBack = new (_indexTipTransform.position.x + 0.3f, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.4f);
+            if (!Physics.Raycast(indexTipBack, -_indexTipTransform.up, out RaycastHit hit, 1f, LayerMask.GetMask("Board")))
                 _marker.StopDraw();
             else
             {
@@ -48,6 +53,13 @@ namespace Board
                 //TODO Draw from raycast hit point to the board
                 _marker.TryDraw(hit);
             }
+        }
+        
+        public void StopErase()
+        {
+            erasing = false;
+            _marker.StopDraw();
+            _marker.Eraser(false);
         }
         
         // public void OnActivating() => _isPoking = true;
