@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Board;
+using Board.Tools;
 using Manager;
 using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Subsystems;
@@ -121,10 +121,11 @@ public class HandGestureDetection : MonoBehaviour
         {
             Debug.Log($"Gesture recognized: {currentGesture.name}");
             currentGesture.onRecognized?.Invoke();
-            previousGesture.onDerecognized?.Invoke();
             previousGesture = currentGesture;
             StartCoroutine(SetOnCooldown(currentGesture));
         }
+        else
+            previousGesture.onDerecognized?.Invoke();
     }
     
     private bool IndexExtended(IReadOnlyList<HandJointPose> joints)

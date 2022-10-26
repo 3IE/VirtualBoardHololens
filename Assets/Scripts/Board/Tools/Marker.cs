@@ -3,7 +3,7 @@ using Manager;
 using UnityEngine;
 using Utils;
 
-namespace Board
+namespace Board.Tools
 {
     /// <inheritdoc />
     public class Marker : WritingTool
@@ -187,9 +187,9 @@ namespace Board
         ///     Applies a modification
         /// </summary>
         /// <param name="modification"> Modification to apply </param>
-        private void ModifyTexture(Modification modification)
+        private static void ModifyTexture(Modification modification)
         {
-            Color[] colors = Tools.GenerateSquare(modification.Color, penSize);
+            Color[] colors = Tools.GenerateSquare(modification.Color, modification.PenSize);
 
             ModifyTexture(modification.X,     modification.Y, modification.DestX,
                           modification.DestY, colors,
@@ -200,7 +200,7 @@ namespace Board
         ///     Modifies the board's texture and notifies the GPU to update its rendering
         /// </summary>
         /// <param name="modification"> modification to apply </param>
-        public void AddModification(Modification modification)
+        public static void AddModification(Modification modification)
         {
             ModifyTexture(modification);
             Tools.Instance.Modified = true;

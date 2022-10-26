@@ -1,4 +1,6 @@
 using System;
+using Board;
+using Board.Tools;
 using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
@@ -295,9 +297,7 @@ namespace Manager
             {
                 case EventCode.Marker:
                 case EventCode.Eraser:
-                    Debug.Log("Marker or Eraser");
-
-                    Board.Board.Instance.AddModification(new Modification(data));
+                    Marker.AddModification(new Modification(data));
                     break;
 
                 case EventCode.Texture:

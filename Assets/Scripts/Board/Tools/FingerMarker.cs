@@ -2,7 +2,7 @@ using Manager;
 using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 
-namespace Board
+namespace Board.Tools
 {
     public class FingerMarker : MonoBehaviour
     {
@@ -20,13 +20,15 @@ namespace Board
             _indexTipTransform = GetComponentInChildren<NearInteractionModeDetector>().transform;
         }
 
+        /// <summary>
+        /// Draw or erase from IndexTip or the palm depending 'erasing' state
+        /// </summary>
         private void Update()
         {
             //if (!_isPoking) return;
-            if (erasing) return;
             
-            Vector3 indexTipBack = new (_indexTipTransform.position.x, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.1f);
-            if (!Physics.Raycast(indexTipBack, _indexTipTransform.forward, out RaycastHit hit, 0.2f, LayerMask.GetMask("Board")))
+            var indexTipBack = erasing ? new Vector3(_indexTipTransform.position.x + 0.3f, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.4f) : new Vector3(_indexTipTransform.position.x, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.1f);
+            if (!Physics.Raycast(indexTipBack, erasing ? -_indexTipTransform.up : _indexTipTransform.forward, out RaycastHit hit,  erasing ? 1f : 0.2f, LayerMask.GetMask("Board")))
                 _marker.StopDraw();
             else
             {
@@ -42,17 +44,6 @@ namespace Board
         {
             erasing = true;
             _marker.Eraser(true);
-            
-            Vector3 indexTipBack = new (_indexTipTransform.position.x + 0.3f, _indexTipTransform.position.y, _indexTipTransform.position.z - 0.4f);
-            if (!Physics.Raycast(indexTipBack, -_indexTipTransform.up, out RaycastHit hit, 1f, LayerMask.GetMask("Board")))
-                _marker.StopDraw();
-            else
-            {
-                sphereDebug.transform.position = hit.point;
-                PrintVar.print(2, $"Drawing at {hit.textureCoord}");
-                //TODO Draw from raycast hit point to the board
-                _marker.TryDraw(hit);
-            }
         }
         
         public void StopErase()
