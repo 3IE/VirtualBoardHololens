@@ -12,15 +12,20 @@ namespace Board
         private Board      _board;
         private Color[]    _colors;
 
+        /// <summary>
+        ///     Position on the board touched last
+        /// </summary>
+        private Vector2 _lastTouchPos;
+
         private Renderer _renderer;
 
         private Transform _tipTransform;
         private Vector2   _touchPos;
 
-        /// <summary>
-        ///     Position on the board touched last
-        /// </summary>
-        private Vector2 LastTouchPos;
+        public Color color = Color.blue;
+        private Color boardColor;
+
+        private bool Erasing;
 
         // Start is called before the first frame update
         private void Start()
@@ -28,15 +33,18 @@ namespace Board
             _appManager = GetComponent<AppManager>();
             _board      = _appManager.BoardTransform.GetComponentInChildren<Board>();
             _renderer   = _appManager.BoardTransform.GetComponentInChildren<Renderer>();
-
+            
             TouchedLast = false;
+            Erasing     = false;
+            boardColor  = Board.Instance.texture.GetPixel(0, 0);
         }
 
         public void TryDraw(RaycastHit touch)
         {
-            PrintVar.print(5, $"touch: {touch.textureCoord2}");
             Tools.Instance.Modified = Draw(touch) || Tools.Instance.Modified;
         }
+        
+        public void StopDraw() => TouchedLast = false;
 
         /// <summary>
         ///     We check if we are in the boundaries of the board
@@ -58,33 +66,32 @@ namespace Board
         ///     otherwise draw while touching (interpolation used to avoid drawing only dots) and return <see langword="true" />
         ///     we send the modifications at each frame
         /// </summary>
-        private bool Draw(RaycastHit _touch)
+        private bool Draw(RaycastHit touch)
         {
             // We check if we are touching the board with the marker
-            if (_touch.transform.CompareTag("Board"))
+            if (touch.transform.CompareTag("Board"))
             {
-                _board    ??= _touch.transform.GetComponent<Board>();
-                _touchPos =   new Vector2(_touch.textureCoord.x, _touch.textureCoord.y);
+                _board    ??= touch.transform.GetComponent<Board>();
+                _touchPos =   new Vector2(touch.textureCoord.x, touch.textureCoord.y);
 
                 var x = (int) (_touchPos.x * _board.textureSize.x - penSize / 2);
                 var y = (int) (_touchPos.y * _board.textureSize.y - penSize / 2);
 
                 // If we are touching the board and in its boundaries, then we draw
-                PrintVar.print(1, $"position: {x}  {y}");
-                PrintVar.print(3, $"InBound: {InBound(x, y)}");
-
                 if (!InBound(x, y))
                     return false;
-
+                    
+                PrintVar.print(10, $"Inbound: {touch.textureCoord}");
+                
                 if (TouchedLast)
                 {
-                    if (Vector2.Distance(new Vector2(x, y), LastTouchPos) < 0.01f)
+                    if (Vector2.Distance(new Vector2(x, y), _lastTouchPos) < 0.01f)
                         return false;
 
                     try
                     {
-                        ModifyTexture(x,              y,       LastTouchPos.x,
-                                      LastTouchPos.y, _colors, penSize);
+                        ModifyTexture(x,               y,       _lastTouchPos.x,
+                                      _lastTouchPos.y, _colors, penSize);
                     } catch (ArgumentException)
                     {
                         TouchedLast = false;
@@ -99,8 +106,8 @@ namespace Board
                 else
                     _colors = GenerateShape();
 
-                LastTouchPos = new Vector2(x, y);
-                TouchedLast  = true;
+                _lastTouchPos = new Vector2(x, y);
+                TouchedLast   = true;
 
                 return true;
             }
@@ -111,13 +118,23 @@ namespace Board
             return false;
         }
 
+        public void Eraser(bool active = true)
+        {
+            if (active == Erasing) return;
+            
+            penSize = active ? penSize * 5 : penSize / 5;
+            color   = active ? boardColor : Color.blue;
+            
+            Erasing = active;
+        }
+        
         /// <summary>
         ///     Generates a color array
         /// </summary>
         /// <returns> color array </returns>
         private Color[] GenerateShape()
         {
-            return Tools.GenerateSquare(_renderer.material.color, penSize);
+            return Tools.GenerateSquare(color, penSize);
 
             // TODO generate shape depending on selected one
         }
@@ -129,8 +146,8 @@ namespace Board
         /// <param name="y"> y coordinate of the starting point of the modification </param>
         private void SendModification(int x, int y)
         {
-            new Modification(x, y, LastTouchPos.x,
-                             LastTouchPos.y, _renderer.material.color,
+            new Modification(x, y, _lastTouchPos.x,
+                             _lastTouchPos.y, color,
                              penSize)
                 .Send(EventCode.Marker);
         }
@@ -188,7 +205,7 @@ namespace Board
             ModifyTexture(modification);
             Tools.Instance.Modified = true;
         }
-
+        
         // TODO add other shapes ?
     }
 }
