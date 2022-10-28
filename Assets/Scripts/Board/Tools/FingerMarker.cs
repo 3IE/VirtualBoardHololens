@@ -12,8 +12,6 @@ namespace Board.Tools
         private Marker         _marker;
         private Transform      _indexTipTransform;
 
-        public GameObject sphereDebug;
-
         private void Start()
         {
             _marker            = appManager.GetComponent<Marker>();
@@ -32,14 +30,13 @@ namespace Board.Tools
                 _marker.StopDraw();
             else
             {
-                sphereDebug.transform.position = hit.point;
                 PrintVar.print(2, $"Drawing at {hit.textureCoord}");
                 //TODO Draw from raycast hit point to the board
                 _marker.TryDraw(hit);
             }
         }
 
-        private bool erasing = false;
+        private bool erasing;
         public void Erase()
         {
             erasing = true;

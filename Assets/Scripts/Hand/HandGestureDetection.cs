@@ -129,7 +129,7 @@ public class HandGestureDetection : MonoBehaviour
     }
     
     private bool IndexExtended(IReadOnlyList<HandJointPose> joints)
-        => Vector3.Distance(joints[(int)TrackedHandJoint.IndexProximal].Position, 
+        => Vector3.Distance(joints[(int)TrackedHandJoint.IndexProximal].Position,
                joints[(int)TrackedHandJoint.IndexTip].Position) > indexThreshold;
     
     private bool IndexHeadAligned(IReadOnlyList<HandJointPose> joints)
