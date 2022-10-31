@@ -30,7 +30,7 @@ namespace Board.Tools
                 _marker.StopDraw();
             else
             {
-                PrintVar.print(2, $"Drawing at {hit.textureCoord}");
+                //PrintVar.print(2, $"Drawing at {hit.textureCoord}");
                 //TODO Draw from raycast hit point to the board
                 _marker.TryDraw(hit);
             }

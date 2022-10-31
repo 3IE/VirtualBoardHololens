@@ -10,6 +10,12 @@
         "com.unity.xr.openxr": "1.4.2"
       }
     },
+    "com.microsoft.mixedreality.toolkit.micstream": {
+      "version": "file:MixedReality/com.microsoft.mixedreality.toolkit.micstream-1.0.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {}
+    },
     "com.microsoft.mrtk.accessibility": {
       "version": "file:MixedReality/com.microsoft.mrtk.accessibility-1.0.0-pre.11.tgz",
       "depth": 0,
