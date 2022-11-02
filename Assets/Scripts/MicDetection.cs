@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
-using Microsoft.MixedReality.Toolkit.Audio;
-using Photon.Voice.Unity.UtilityScripts;
-using UnityEditor.PackageManager.UI;
+using Photon.Voice;
+using Photon.Voice.Unity;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +9,7 @@ public class MicDetection : MonoBehaviour
     private Slider slider;
     private int sampleWindow = 64;
     private AudioClip micClip;
+    [SerializeField] private Recorder recorder;
 
     private void Awake()
     {
@@ -21,22 +20,26 @@ public class MicDetection : MonoBehaviour
     private IEnumerator Start()
     {
         yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
-        PrintVar.print(1, $"Microphone: {Microphone.devices[0]}");
+        PrintVar.print(1, $"Microphone: {string.Join(",\n", Microphone.devices)}");
         MicrophoneToAudioClip();
+        
+        recorder.MicrophoneDevice = new DeviceInfo(Microphone.devices[0]);
+        recorder.TransmitEnabled = true;
     }
 
     // Update is called once per frame
     private void Update()
     {
-        if (micClip == null)
-        {
-            PrintVar.print(0, $"micClip is null");
-            return;
-        }
-        PrintVar.print(2, $"{Microphone.IsRecording(Microphone.devices[0])}");
-        var val = GetLoudnessFromAudioClip(Microphone.GetPosition(Microphone.devices[0]), micClip);
-        PrintVar.print(0, $"Mic Level: {val}");
-        slider.value = val;
+        // if (micClip == null)
+        // {
+        //     PrintVar.print(0, $"micClip is null");
+        //     return;
+        // }
+        //PrintVar.print(2, $"{Microphone.IsRecording(Microphone.devices[0])}");
+        //var val = GetLoudnessFromAudioClip(Microphone.GetPosition(Microphone.devices[0]), micClip);
+        //PrintVar.print(0, $"Mic Level: {val}");
+        PrintVar.print(0, $"Mic level: {recorder.LevelMeter.CurrentAvgAmp}");
+        slider.value = recorder.LevelMeter.CurrentAvgAmp; //val;
     }
     
     private void MicrophoneToAudioClip()
