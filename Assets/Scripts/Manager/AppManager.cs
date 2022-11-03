@@ -315,6 +315,7 @@ namespace Manager
 
         private static void OnObjectEvent(EventCode eventCode, object data)
         {
+            PrintVar.print(1, $"NewObjectEvent: {eventCode.ToString()}");
             switch (eventCode)
             {
                 case EventCode.SendNewObject:

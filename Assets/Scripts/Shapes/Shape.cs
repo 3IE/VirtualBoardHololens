@@ -403,7 +403,7 @@ namespace Shapes
         /// TODO: Make it so that the object can move with the fingers or through a button
         private void Move()
         {
-            throw new NotImplementedException();
+            SendTransform();
 
             /*
             if (Physics.Raycast(Interactors[0].transform.position, Interactors[0].transform.forward,
@@ -460,11 +460,11 @@ namespace Shapes
                 _initialScale
                 / InitialDistance
                 * Vector3.Distance(Interactors[0].transform.position, Interactors[1].transform.position);
-            */
 
             UpdateSize();
 
             SendTransform();
+            */
         }
 
         /// <summary>
@@ -475,7 +475,7 @@ namespace Shapes
         {
             throw new NotImplementedException();
 
-            SendTransform();
+            //SendTransform();
         }
 
         #endregion
