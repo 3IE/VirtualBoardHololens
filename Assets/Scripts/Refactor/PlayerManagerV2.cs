@@ -31,8 +31,8 @@ namespace Refactor
             {
                 LocalPlayerInstance = gameObject;
 
-                //_markerSync = MarkerSync.LocalInstance;
-                //_marker     = _markerSync.gameObject;
+                _markerSync = MarkerSync.LocalInstance;
+                _marker     = _markerSync.gameObject;
 
                 entity.SetOwnership(); 
                 
@@ -44,17 +44,17 @@ namespace Refactor
                     ? (DeviceType) type
                     : DeviceType.Unknown;
 
-                //_marker     = Instantiate(markerPrefab, Vector3.zero, Quaternion.identity);
-                //_markerSync = _marker.GetComponent<MarkerSync>();
+                _marker     = Instantiate(markerPrefab, Vector3.zero, Quaternion.identity);
+                _markerSync = _marker.GetComponent<MarkerSync>();
                 
-                //_marker.SetActive(false);
+                _marker.SetActive(false);
 
                 entity.SetDevice(deviceType);
                 
                 AppManager.Players.Add(photonView.Owner.ActorNumber, this);
             }
             
-            //_markerSync.Board = GameManager.Instance.Board;
+            _markerSync.Board = GameManager.Instance.Board;
 
             DontDestroyOnLoad(gameObject);
         }
