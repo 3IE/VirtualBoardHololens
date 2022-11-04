@@ -1,6 +1,7 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using UnityEngine;
+using Utils;
 using DeviceType = Utils.DeviceType;
 
 namespace Refactor
@@ -10,9 +11,36 @@ namespace Refactor
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
 
+        [SerializeField] private Transform board;
         [SerializeField] private Transform mainCamera;
-        [SerializeField] private Transform leftHand;
-        [SerializeField] private Transform rightHand;
+        [SerializeField] private Transform leftInteractor;
+        [SerializeField] private Transform rightInteractor;
+
+        [SerializeField] private DeviceType deviceType = DeviceType.VR;
+
+        public static GameManager Instance;
+        
+        public Transform Board
+        {
+            get { return board; }
+        }
+
+        private void Awake()
+        {
+            PhotonNetwork.SetPlayerCustomProperties(new Hashtable
+                                                        { { "Device", deviceType } });
+
+            Debug.Log("Connecting");
+            PhotonNetwork.ConnectUsingSettings();
+            
+            Instance = this;
+        }
+
+        public override void OnConnectedToMaster()
+        {
+            Debug.Log("Joining room");
+            PhotonNetwork.JoinRandomOrCreateRoom();
+        }
 
         public override void OnCreatedRoom()
         {
@@ -37,24 +65,22 @@ namespace Refactor
                 Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'",
                                this);
             }
-            else if (PlayerManager.LocalPlayerInstance is null)
+            else if (PlayerManagerV2.LocalPlayerInstance is null)
             {
                 Debug.LogFormat("We are Instantiating LocalPlayer from {0}\nPrefab name: {1}",
-                                SceneManagerHelper.ActiveSceneName, this.playerPrefab.name);
+                                SceneManagerHelper.ActiveSceneName, playerPrefab.name);
 
                 // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
                 GameObject player =
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, mainCamera.position, mainCamera.rotation);
+                    PhotonNetwork.Instantiate(playerPrefab.name, mainCamera.position, mainCamera.rotation);
                 player.transform.SetParent(mainCamera);
 
-                var entity = player.GetComponent<PlayerEntity>();
-
-                entity.ReplaceHandsTransforms(leftHand, rightHand);
+                var entity = player.GetComponent<PlayerEntityV2>();
+                entity.SetDevice(DeviceType.VR);
+                entity.ReplaceHandsTransforms(leftInteractor, rightInteractor);
             }
             else
-            {
                 Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
-            }
         }
     }
 }

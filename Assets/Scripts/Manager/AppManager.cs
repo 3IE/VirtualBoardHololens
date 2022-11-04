@@ -1,9 +1,10 @@
 using System;
-using Board;
+using System.Collections.Generic;
 using Board.Tools;
 using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
+using Refactor;
 using Shapes;
 using TMPro;
 using UnityEngine;
@@ -27,16 +28,20 @@ namespace Manager
         private HoloPlayerManager _playerManager;
 
         private Vector2 _touchPos;
+        
+        public static Dictionary<int, PlayerManagerV2> Players;
 
         public Transform CamTransform
         {
-            get
-            {
-                return cam.transform;
-            }
+            get { return cam.transform; }
         }
 
         public Transform BoardTransform { get; private set; }
+
+        private void Awake()
+        {
+            Players = new Dictionary<int, PlayerManagerV2>();
+        }
 
         private void Start()
         {
@@ -240,7 +245,7 @@ namespace Manager
                     break;
 
                 case < 20:
-                    OnPlayerEvent((EventCode) eventCode, photonEvent.CustomData);
+                    OnPlayerEvent((EventCode) eventCode, photonEvent.CustomData, photonEvent);
                     break;
 
                 case < 30:
@@ -263,7 +268,7 @@ namespace Manager
 
         #region PLAYER_EVENTS
 
-        private void OnPlayerEvent(EventCode eventCode, object data)
+        private void OnPlayerEvent(EventCode eventCode, object data, EventData photonEvent)
         {
             switch (eventCode)
             {
@@ -280,6 +285,10 @@ namespace Manager
 
                 case EventCode.SendNewPing:
                     OnlinePing((Vector2) data);
+                    break;
+                
+                case EventCode.SendNewPosition:
+                    Players[photonEvent.Sender].entity.UpdateTransforms(data as object[]);
                     break;
 
                 default:
@@ -301,7 +310,8 @@ namespace Manager
                     break;
 
                 case EventCode.Texture:
-                    Board.Board.Instance.texture.LoadImage(data as byte[]);
+                    //TODO: DELETE and replace
+                    //Board.Board.Instance.texture.LoadImage(data as byte[]);
                     break;
 
                 default:

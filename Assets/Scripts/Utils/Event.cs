@@ -26,6 +26,12 @@ namespace Utils
 
         /// <summary> Code used for sending a modification made by the eraser </summary>
         Eraser,
+        
+        MarkerGrab,
+        
+        MarkerPosition,
+        
+        MarkerColor,
 
         /// <summary> Code used for sending the whole texture </summary>
         Texture = 29,
@@ -42,7 +48,7 @@ namespace Utils
 
         /// <summary> Code used for updating the ownership of an object </summary>
         SendOwnership,
-        
+
         /// <summary> Code used to set the counter for the creation of objects </summary>
         SendCounter,
 
