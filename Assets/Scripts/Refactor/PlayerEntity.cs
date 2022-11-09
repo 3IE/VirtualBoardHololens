@@ -17,8 +17,42 @@ namespace Refactor
         private void Awake()
         {
             _boardTransform = Board.Board.Instance.transform;
-            
+
             DontDestroyOnLoad(gameObject);
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo messageInfo)
+        {
+            Vector3 boardPosition = _boardTransform.position;
+
+            if (stream.IsWriting)
+            {
+                stream.SendNext(playerTransform.position - boardPosition);
+                stream.SendNext(playerTransform.rotation);
+
+                if (_isAr)
+                    return;
+
+                stream.SendNext(leftHandTransform.position - boardPosition);
+                stream.SendNext(leftHandTransform.rotation);
+
+                stream.SendNext(rightHandTransform.position - boardPosition);
+                stream.SendNext(rightHandTransform.rotation);
+            }
+            else
+            {
+                playerTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
+                playerTransform.rotation = (Quaternion) stream.ReceiveNext();
+
+                if (_isAr)
+                    return;
+
+                leftHandTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
+                leftHandTransform.rotation = (Quaternion) stream.ReceiveNext();
+
+                rightHandTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
+                rightHandTransform.rotation = (Quaternion) stream.ReceiveNext();
+            }
         }
 
         public void SetDevice(DeviceType deviceType)
@@ -34,42 +68,8 @@ namespace Refactor
             if (!_isAr)
                 return;
 
-            this.leftHandTransform  = newLeftHandTransform;
-            this.rightHandTransform = newRightHandTransform;
-        }
-        
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo messageInfo)
-        {
-            Vector3 boardPosition = _boardTransform.position;
-            
-            if (stream.IsWriting)
-            {
-                stream.SendNext(playerTransform.position - boardPosition);
-                stream.SendNext(playerTransform.rotation);
-
-                if (_isAr)
-                    return;
-
-                stream.SendNext(leftHandTransform.position - boardPosition);
-                stream.SendNext(leftHandTransform.rotation);
-                
-                stream.SendNext(rightHandTransform.position - boardPosition);
-                stream.SendNext(rightHandTransform.rotation);
-            }
-            else
-            {
-                playerTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
-                playerTransform.rotation = (Quaternion) stream.ReceiveNext();
-
-                if (_isAr)
-                    return;
-                
-                leftHandTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
-                leftHandTransform.rotation = (Quaternion) stream.ReceiveNext();
-                
-                rightHandTransform.position = (Vector3) stream.ReceiveNext() + boardPosition;
-                rightHandTransform.rotation = (Quaternion) stream.ReceiveNext();
-            }
+            leftHandTransform  = newLeftHandTransform;
+            rightHandTransform = newRightHandTransform;
         }
     }
 }

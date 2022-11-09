@@ -6,10 +6,10 @@ using UnityEngine.UI;
 
 public class MicDetection : MonoBehaviour
 {
-    private Slider slider;
-    private int sampleWindow = 64;
-    private AudioClip micClip;
-    [SerializeField] private Recorder recorder;
+    [SerializeField] private Recorder  recorder;
+    private                  AudioClip micClip;
+    private readonly         int       sampleWindow = 64;
+    private                  Slider    slider;
 
     private void Awake()
     {
@@ -20,11 +20,12 @@ public class MicDetection : MonoBehaviour
     private IEnumerator Start()
     {
         yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
+
         PrintVar.print(1, $"Microphone: {string.Join(",\n", Microphone.devices)}");
         MicrophoneToAudioClip();
-        
+
         recorder.MicrophoneDevice = new DeviceInfo(Microphone.devices[0]);
-        recorder.TransmitEnabled = true;
+        recorder.TransmitEnabled  = true;
     }
 
     // Update is called once per frame
@@ -41,22 +42,24 @@ public class MicDetection : MonoBehaviour
         PrintVar.print(0, $"Mic level: {recorder.LevelMeter.CurrentAvgAmp}");
         slider.value = recorder.LevelMeter.CurrentAvgAmp; //val;
     }
-    
+
     private void MicrophoneToAudioClip()
-        => micClip = Microphone.Start(Microphone.devices[0], true, 20, 44100);
+    {
+        micClip = Microphone.Start(Microphone.devices[0], true, 20,
+                                   44100);
+    }
 
     private float GetLoudnessFromAudioClip(int clipPosition, AudioClip clip)
     {
         int startPos = clipPosition - sampleWindow;
-        float[] waveData = new float[sampleWindow];
+        var waveData = new float[sampleWindow];
         clip.GetData(waveData, startPos);
-        
+
         float totalLoudness = 0;
-        for (int i = 0; i < sampleWindow; i++)
-        {
+
+        for (var i = 0; i < sampleWindow; i++)
             totalLoudness += Mathf.Abs(waveData[i]);
-        }
-        
+
         return totalLoudness / sampleWindow;
     }
 }

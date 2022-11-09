@@ -5,7 +5,7 @@ namespace Refactor
     public class BoardReset : MonoBehaviour
     {
         [SerializeField] private Camera boardCamera;
-    
+
         public void ResetBoard()
         {
             RenderTexture rt = RenderTexture.active;

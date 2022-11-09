@@ -2,6 +2,7 @@ using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using EventCode = Utils.EventCode;
 
 namespace Manager
 {
@@ -11,7 +12,8 @@ namespace Manager
         {
             var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
 
-            PhotonNetwork.RaiseEvent((byte) Utils.EventCode.SendNewPing, position, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((byte) EventCode.SendNewPing, position, raiseEventOptions,
+                                     SendOptions.SendReliable);
         }
     }
 }

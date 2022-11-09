@@ -3,6 +3,7 @@ using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.UX;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using DeviceType = Utils.DeviceType;
@@ -10,19 +11,20 @@ using DeviceType = Utils.DeviceType;
 namespace Manager
 {
     /// <summary>
-    /// Connection script for the phone app (DO NOT PUSH)
+    ///     Connection script for the phone app (DO NOT PUSH)
     /// </summary>
     public class PhoneLauncher : MonoBehaviourPunCallbacks
     {
-        [SerializeField] private TMPro.TMP_InputField usernameInput;
-        [SerializeField] private TMPro.TMP_Text       waitingText;
-        [SerializeField] private UGUIInputAdapter     waitingButton;
+        private const            string           GameVersion = "1";
+        [SerializeField] private TMP_InputField   usernameInput;
+        [SerializeField] private TMP_Text         waitingText;
+        [SerializeField] private UGUIInputAdapter waitingButton;
 
-        [FormerlySerializedAs("_menuSystem")] [SerializeField]
+        [FormerlySerializedAs("_menuSystem")]
+        [SerializeField]
         private MenuSystem menuSystem;
 
-        private const string GameVersion = "1";
-        private       bool   _connecting;
+        private bool _connecting;
 
         private void Awake()
         {
@@ -30,9 +32,9 @@ namespace Manager
         }
 
         /// <summary>
-        /// Start the connection process.
-        /// - If already connected, we attempt joining a lobby
-        /// - if not yet connected, Connect this application instance to Photon Cloud Network
+        ///     Start the connection process.
+        ///     - If already connected, we attempt joining a lobby
+        ///     - if not yet connected, Connect this application instance to Photon Cloud Network
         /// </summary>
         public void Connect()
         {
@@ -45,9 +47,7 @@ namespace Manager
 
             // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
             if (PhotonNetwork.IsConnected)
-            {
                 PhotonNetwork.JoinLobby();
-            }
             else
             {
                 // #Critical, we must first and foremost connect to Photon Online Server.
@@ -77,8 +77,10 @@ namespace Manager
 
             if (PhotonNetwork.InRoom)
                 PhotonNetwork.LeaveRoom();
+
             if (PhotonNetwork.InLobby)
                 PhotonNetwork.LeaveLobby();
+
             if (PhotonNetwork.IsConnected)
                 PhotonNetwork.Disconnect();
 

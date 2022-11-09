@@ -102,7 +102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entity: {fileID: 3860013000221249450}
   deviceType: 0
-  markerPrefab: {fileID: 0}
+  markerPrefab: {fileID: 5640421813213010301, guid: d5415e5d0aabb3540a142c7409a2ed79, type: 3}
 --- !u!1 &7609648570768286184
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,7 +165,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 56afe03e271b487459d8e75e48e1d5ec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

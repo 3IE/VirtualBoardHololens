@@ -26,11 +26,11 @@ namespace Utils
 
         /// <summary> Code used for sending a modification made by the eraser </summary>
         Eraser,
-        
+
         MarkerGrab,
-        
+
         MarkerPosition,
-        
+
         MarkerColor,
 
         /// <summary> Code used for sending the whole texture </summary>

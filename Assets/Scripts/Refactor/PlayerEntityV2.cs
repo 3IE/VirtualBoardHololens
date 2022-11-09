@@ -13,20 +13,34 @@ namespace Refactor
         [SerializeField] private Transform leftHandTransform;
         [SerializeField] private Transform rightHandTransform;
 
+        private bool       _isAr;
+        private bool       _isMine;
+        private Vector3    _leftHandPos;
+        private Quaternion _leftHandRot;
+
         private Vector3 _playerPos;
-        private Vector3 _leftHandPos;
-        private Vector3 _rightHandPos;
 
         private Quaternion _playerRot;
-        private Quaternion _leftHandRot;
+        private Vector3    _rightHandPos;
         private Quaternion _rightHandRot;
-
-        private bool _isAr;
-        private bool _isMine;
 
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
+        }
+
+        private void Update()
+        {
+            if (_isMine)
+                return;
+
+            playerTransform.position    = _playerPos;
+            leftHandTransform.position  = _leftHandPos;
+            rightHandTransform.position = _rightHandPos;
+
+            playerTransform.rotation    = _playerRot;
+            leftHandTransform.rotation  = _leftHandRot;
+            rightHandTransform.rotation = _rightHandRot;
         }
 
         private void FixedUpdate()
@@ -43,20 +57,6 @@ namespace Refactor
 
             PhotonNetwork.RaiseEvent((byte) EventCode.SendNewPosition, data, raiseEventOptions,
                                      SendOptions.SendUnreliable);
-        }
-
-        private void Update()
-        {
-            if (_isMine)
-                return;
-
-            playerTransform.position    = _playerPos;
-            leftHandTransform.position  = _leftHandPos;
-            rightHandTransform.position = _rightHandPos;
-
-            playerTransform.rotation    = _playerRot;
-            leftHandTransform.rotation  = _leftHandRot;
-            rightHandTransform.rotation = _rightHandRot;
         }
 
         public void UpdateTransforms(object[] data)

@@ -8,9 +8,11 @@ namespace Board.Tools
     {
         [SerializeField] private AppManager appManager;
 
-        //private bool           _isPoking;
-        private Marker    _marker;
+        private bool      _erasing;
         private Transform _indexTipTransform;
+
+        //private bool           _isPoking;
+        private Marker _marker;
 
         private void Start()
         {
@@ -19,7 +21,7 @@ namespace Board.Tools
         }
 
         /// <summary>
-        /// Draw or erase from IndexTip or the palm depending 'erasing' state
+        ///     Draw or erase from IndexTip or the palm depending 'erasing' state
         /// </summary>
         private void Update()
         {
@@ -36,16 +38,14 @@ namespace Board.Tools
             {
                 //PrintVar.print(2, $"Drawing at {hit.textureCoord}");
                 //TODO Draw from raycast hit point to the board
-                ;//_marker.TryDraw(hit);
+                ; //_marker.TryDraw(hit);
             }
         }
-
-        private bool _erasing;
 
         public void Erase()
         {
             _erasing = true;
-            _marker.Eraser(true);
+            _marker.Eraser();
         }
 
         public void StopErase()

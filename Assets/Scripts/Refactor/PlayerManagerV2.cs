@@ -12,18 +12,13 @@ namespace Refactor
 
         public PlayerEntityV2 entity;
 
-        private MarkerSync _markerSync;
-        private GameObject _marker;
-
         [SerializeField] private DeviceType deviceType;
         [SerializeField] private GameObject markerPrefab;
+        private                  GameObject _marker;
 
-        private void OnDestroy()
-        {
-            Destroy(_marker);
-        }
+        private MarkerSync _markerSync;
 
-        private void Awake()
+        private void Start()
         {
             var photonView = GetComponent<PhotonView>();
 
@@ -34,8 +29,8 @@ namespace Refactor
                 _markerSync = MarkerSync.LocalInstance;
                 _marker     = _markerSync.gameObject;
 
-                entity.SetOwnership(); 
-                
+                entity.SetOwnership();
+
                 AppManager.Players.Add(PhotonNetwork.LocalPlayer.ActorNumber, this);
             }
             else
@@ -46,23 +41,28 @@ namespace Refactor
 
                 _marker     = Instantiate(markerPrefab, Vector3.zero, Quaternion.identity);
                 _markerSync = _marker.GetComponent<MarkerSync>();
-                
+
                 _marker.SetActive(false);
 
                 entity.SetDevice(deviceType);
-                
+
                 AppManager.Players.Add(photonView.Owner.ActorNumber, this);
             }
-            
+
             _markerSync.Board = GameManager.Instance.Board;
 
             DontDestroyOnLoad(gameObject);
         }
 
+        private void OnDestroy()
+        {
+            Destroy(_marker);
+        }
+
         public void ReceiveMarkerGrab(object data)
         {
             var grabbed = (bool) data;
-            
+
             _marker.SetActive(grabbed);
         }
 

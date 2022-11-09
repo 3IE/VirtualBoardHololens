@@ -1,13 +1,14 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using UnityEngine;
-using Utils;
 using DeviceType = Utils.DeviceType;
 
 namespace Refactor
 {
     public class GameManager : MonoBehaviourPunCallbacks
     {
+        public static GameManager Instance;
+
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
 
@@ -18,8 +19,6 @@ namespace Refactor
 
         [SerializeField] private DeviceType deviceType = DeviceType.VR;
 
-        public static GameManager Instance;
-        
         public Transform Board
         {
             get { return board; }
@@ -32,7 +31,7 @@ namespace Refactor
 
             Debug.Log("Connecting");
             PhotonNetwork.ConnectUsingSettings();
-            
+
             Instance = this;
         }
 

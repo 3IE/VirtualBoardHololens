@@ -16,17 +16,17 @@ namespace Refactor
         private void Awake()
         {
             var photonView = GetComponent<PhotonView>();
-        
-            if (photonView.IsMine)
-                LocalPlayerInstance = this.gameObject;
 
-            this.deviceType = photonView.Owner.CustomProperties.TryGetValue("Device", out object device)
+            if (photonView.IsMine)
+                LocalPlayerInstance = gameObject;
+
+            deviceType = photonView.Owner.CustomProperties.TryGetValue("Device", out object device)
                 ? (DeviceType) device
                 : DeviceType.Unknown;
 
             entity.SetDevice(deviceType);
-            
-            DontDestroyOnLoad(this.gameObject);
+
+            DontDestroyOnLoad(gameObject);
         }
     }
 }

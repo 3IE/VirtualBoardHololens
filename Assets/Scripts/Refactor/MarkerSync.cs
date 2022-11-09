@@ -15,38 +15,31 @@ namespace Refactor
         [SerializeField] private Transform board;
         [SerializeField] private Transform tip;
         [SerializeField] private Transform trace;
+        [SerializeField] private Transform rightHandCursor;
 
-        private bool _send;
-        private bool _empty;
+        private float _boardMaxDistance;
+        private bool  _empty;
 
         private float _factor;
-        private float _boardMaxDistance;
+        private float _alpha;
 
-        private Transform _transform;
+        private Queue<Vector3>    _grabPosition;
+        private Queue<Quaternion> _grabRotation;
 
         private Vector3    _lastPosition;
         private Vector3    _lastSentPosition;
         private Quaternion _lastSentRotation;
 
-        private Queue<Vector3>    _grabPosition;
-        private Queue<Quaternion> _grabRotation;
-
         private Material _material;
+
+        private bool     _send;
         private Material _traceMaterial;
+
+        private Transform _transform;
 
         public Transform Board
         {
             set { board = value; }
-        }
-
-        public void SendColor()
-        {
-            Color    color = _material.color;
-            object[] data  = { color.r, color.g, color.b, color.a };
-
-            PhotonNetwork.RaiseEvent((byte) EventCode.MarkerColor, data,
-                                     new RaiseEventOptions { Receivers = ReceiverGroup.Others },
-                                     SendOptions.SendUnreliable);
         }
 
         private void Awake()
@@ -68,6 +61,11 @@ namespace Refactor
             LocalInstance ??= this;
         }
 
+        private void Start()
+        {
+            _transform.parent = rightHandCursor;
+        }
+
         private void Update()
         {
             if (_send)
@@ -78,6 +76,16 @@ namespace Refactor
             UpdateTrace();
 
             _lastPosition = tip.position;
+        }
+
+        public void SendColor()
+        {
+            Color    color = _material.color;
+            object[] data  = { color.r, color.g, color.b, color.a };
+
+            PhotonNetwork.RaiseEvent((byte) EventCode.MarkerColor, data,
+                                     new RaiseEventOptions { Receivers = ReceiverGroup.Others },
+                                     SendOptions.SendUnreliable);
         }
 
         private void CheckIfNewPosition()
@@ -158,6 +166,29 @@ namespace Refactor
         public void StopSend()
         {
             _send = false;
+        }
+
+        public void Erase()
+        {
+            _transform.localScale *= 3;
+            _alpha                =  _material.color.a;
+
+            Color color = _material.color;
+            color.a = 0;
+
+            _material.color      = color;
+            _traceMaterial.color = color;
+        }
+
+        public void StopErasing()
+        {
+            _transform.localScale /= 3;
+
+            Color color = _material.color;
+            color.a = _alpha;
+
+            _material.color      = color;
+            _traceMaterial.color = color;
         }
     }
 }
