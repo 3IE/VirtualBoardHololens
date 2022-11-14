@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Board
@@ -27,10 +28,14 @@ namespace Board
             var r = GetComponent<Renderer>();
 
             texture                        = new Texture2D((int) textureSize.x, (int) textureSize.y);
-            Tools.Tools.Instance.baseColor = texture.GetPixel(0, 0);
             r.material.mainTexture         = texture;
 
             Instance = this;
+        }
+
+        private void Start()
+        {
+            Tools.Tools.Instance.baseColor = texture.GetPixel(0, 0);
         }
     }
 }

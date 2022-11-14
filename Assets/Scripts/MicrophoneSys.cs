@@ -20,11 +20,6 @@ using UnityEngine;
         [Range(0, 10)]
         private float inputGain = 1.0f;
 
-        [SerializeField]
-        [Tooltip("Factor by which to boost the microphone amplitude when changing the mesh display.")]
-        [Range(0, 50)]
-        private int amplitudeBoostFactor = 10;
-
         /// <summary>
         /// Class providing microphone stream management support on Microsoft Windows based devices.
         /// </summary>

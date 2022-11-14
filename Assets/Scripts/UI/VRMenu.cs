@@ -19,7 +19,9 @@ namespace UI
         private PanelIndex  _activePanelIndex = PanelIndex.PlayerList;
         private CanvasGroup _canvasGroup;
         private ObjectManipulator _objectManipulator;
-
+        
+        [SerializeField] private GameObject postItPrefab;
+        
         //[SerializeField] private float throwThreshold;
         //[SerializeField] private float timeToFade;
         //private float velocity;
@@ -89,6 +91,14 @@ namespace UI
             _objectManipulator.enabled = false;
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
+        }
+        
+        /// <summary>
+        ///     Generates a Post-it and opens it
+        /// </summary>
+        public void Post_it()
+        {
+            Instantiate(postItPrefab, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
         }
 
         /// <summary>

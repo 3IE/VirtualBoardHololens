@@ -19,7 +19,6 @@ namespace Manager
 
         [SerializeField] private PingSearcher pingSearcher;
 
-        [SerializeField] private float        refreshRate = 0.2f;
         private                  EventManager _eventManager;
         private                  RaycastHit   _hit;
 
