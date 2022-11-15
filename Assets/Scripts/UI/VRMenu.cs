@@ -1,9 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 
 namespace UI
 {
@@ -31,6 +28,11 @@ namespace UI
         {
             _canvasGroup = GetComponent<CanvasGroup>();
             _objectManipulator = GetComponent<ObjectManipulator>();
+        }
+
+        private void OnEnable()
+        {
+            _objectManipulator.enabled = true;
         }
 
         #region throwAway
@@ -87,10 +89,13 @@ namespace UI
         /// </summary>
         public void Close()
         {
+            Debug.Log("Closing menu");
             StopAllCoroutines();
+            _canvasGroup.alpha = 0;
             _objectManipulator.enabled = false;
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
+            transform.SetPositionAndRotation(Vector3.zero + new Vector3(0, -5, 0), Quaternion.Euler(90, 0, 0)); // yup, we hide it under the user
         }
         
         /// <summary>

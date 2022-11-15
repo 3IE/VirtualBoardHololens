@@ -1,39 +1,74 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
-using Shapes;
+using Microsoft.MixedReality.Toolkit.UX;
+using Photon.Pun;
 using UnityEngine;
 
-public class PostItObject : Shape
+public class PostItObject : MonoBehaviour, IPunObservable
 {
-    private void Start()
+    private bool              owned;
+    private bool              ownedByMe;
+
+    public bool OwnedByMe
     {
-        GetComponent<ObjectManipulator>().enabled = true;
+        set => owned = ownedByMe = value;
+
+    }
+    
+    private bool              anchored;
+    
+    private Transform         camTransform;
+    
+    private ObjectManipulator     objectManipulatorComponent;
+    private MRTKTMPInputField     inputField;
+    private PhotonTransformView   photonTransformView;
+    private Transform             transformComponent;
+    private SphereCollider        sphereCollider;
+    
+
+    private void OnEnable()
+    {
+        if (Camera.main != null) 
+            camTransform                   = Camera.main.transform;
+        inputField                         = GetComponentInChildren<MRTKTMPInputField>();
+        objectManipulatorComponent         = GetComponent<ObjectManipulator>();
+        photonTransformView                = GetComponent<PhotonTransformView>();
+        sphereCollider                     = GetComponentInChildren<SphereCollider>();
+        transformComponent                 = GetComponent<Transform>();
+        objectManipulatorComponent.enabled = true;
     }
 
-    public void OnEndEdit()
+    private void Update()
     {
-        
+        if (anchored || owned) return;
+        transformComponent.LookAt(camTransform);
     }
 
-    protected override bool CheckForCollision(Vector3 position)
+    private void OnTriggerEnter(Collider other)
     {
-        throw new System.NotImplementedException();
+        //TODO: Check if the collider is board or object to stick
     }
 
-    protected override int CheckCast()
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        throw new System.NotImplementedException();
-    }
-
-    protected override Vector3 GetPositionFromHit(RaycastHit hit)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    protected override void UpdateSize()
-    {
-        throw new System.NotImplementedException();
+        if (stream.IsWriting)
+        {
+            stream.SendNext(owned);
+            stream.SendNext(inputField.text);
+            stream.SendNext(transformComponent.position);
+            if (ownedByMe)
+                stream.SendNext(transformComponent.rotation);
+        }
+        else
+        {
+            owned                       = (bool) stream.ReceiveNext();
+            inputField.text             = (string) stream.ReceiveNext();
+            transformComponent.position = (Vector3) stream.ReceiveNext();
+            if (owned)
+            {
+                photonTransformView.m_SynchronizeRotation = true;
+                transformComponent.rotation               = (Quaternion) stream.ReceiveNext();
+            }
+        }
     }
 }

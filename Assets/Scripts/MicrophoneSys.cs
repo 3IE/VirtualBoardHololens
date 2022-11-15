@@ -1,12 +1,14 @@
+using System;
 using System.Collections;
 using System.Linq;
 using Microsoft.MixedReality.Toolkit.Audio;
 using Photon.Voice.PUN;
 using Photon.Voice.Unity;
 using UnityEngine;
+using UnityEngine.UI;
 
 
-    /// <summary>
+/// <summary>
     /// Demonstration class using WindowsMicrophoneStream (from com.microsoft.mixedreality.toolkit.micstream) to select the
     /// voice microphone and adjust the spatial awareness mesh based on the amplitude of the user's voice.
     /// </summary>
@@ -19,6 +21,8 @@ using UnityEngine;
         [Tooltip("Gain to apply to the microphone input.")]
         [Range(0, 10)]
         private float inputGain = 1.0f;
+        
+        private Slider inputGainSlider;
 
         /// <summary>
         /// Class providing microphone stream management support on Microsoft Windows based devices.
@@ -29,6 +33,11 @@ using UnityEngine;
         /// The average amplitude of the sound captured during the most recent microphone update.
         /// </summary>
         private float averageAmplitude = 0.0f;
+
+        private void Awake()
+        {
+            inputGainSlider = GetComponent<Slider>();
+        }
 
         private IEnumerator Start()
         {
@@ -68,7 +77,7 @@ using UnityEngine;
                 PrintVar.print(4, $"Failed to start the Windows Microphone Stream. {result}");
             }
             
-            //PrintVar.print(2, $"micStream: {micStream.Gain}");
+            PrintVar.print(5, $"Success ?\nmicStream: {micStream.Gain}");
         }
 
         private void OnDestroy()
@@ -118,6 +127,7 @@ using UnityEngine;
             // Update the gain, if changed.
             if (micStream.Gain != inputGain)
                 micStream.Gain = inputGain;
+           
         }
 
         private void OnAudioFilterRead(float[] buffer, int numChannels)
@@ -146,6 +156,9 @@ using UnityEngine;
             }
 
             averageAmplitude = sumOfValues / buffer.Length;
+            
+            PrintVar.print(6, $"averageAmplitude: {averageAmplitude}");
+            inputGainSlider.value = averageAmplitude;
         }
 
 //#endif // MICSTREAM_PRESENT

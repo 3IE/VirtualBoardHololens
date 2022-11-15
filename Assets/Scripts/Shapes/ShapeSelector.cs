@@ -24,7 +24,7 @@ namespace Shapes
         [SerializeField] private Transform        shapesParent;
         [SerializeField] private List<GameObject> shapes;
 
-        [Range(0.5f, 5f)] [SerializeField] private float velocity = 0.5f;
+        //[Range(0.5f, 5f)] [SerializeField] private float velocity = 0.5f;
 
         [SerializeField] private Material testMaterial;
 
