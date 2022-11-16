@@ -92,6 +92,10 @@ namespace Shapes
 
             _created = true;
 
+        }
+
+        private void Start()
+        {
             _boardTransform ??= Board.Board.Instance.transform;
         }
 

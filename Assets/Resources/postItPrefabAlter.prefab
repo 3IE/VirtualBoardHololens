@@ -35,8 +35,8 @@ Transform:
   m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 643284127146114124}
   - {fileID: 639528691148090385}
+  - {fileID: 643284127146114124}
   - {fileID: 6637405901402105198}
   - {fileID: 1293279238794793478}
   m_Father: {fileID: 0}
@@ -54,6 +54,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 067cfe86065545c4a887eaac7331571a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  owned: 0
+  ownedByMe: 0
+  anchored: 0
 --- !u!114 &3079860947225819191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,8 +110,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 3681770460643228023}
         m_TargetAssemblyTypeName: PostItObject, Assembly-CSharp
-        m_MethodName: set_OwnedByMe
-        m_Mode: 6
+        m_MethodName: OnGrab
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -122,8 +125,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 3681770460643228023}
         m_TargetAssemblyTypeName: PostItObject, Assembly-CSharp
-        m_MethodName: set_OwnedByMe
-        m_Mode: 6
+        m_MethodName: OnReleasing
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -361,7 +364,7 @@ CapsuleCollider:
   m_Radius: 0.75
   m_Height: 8
   m_Direction: 0
-  m_Center: {x: 0, y: 5, z: 0}
+  m_Center: {x: 0, y: 5, z: 1.35}
 --- !u!114 &3526865317133064316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,7 +431,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4214036968811577509}
   m_LocalRotation: {x: 0.7071068, y: 0.7071068, z: 0.00000005960465, w: 0.00000005960465}
-  m_LocalPosition: {x: 0, y: 4.98, z: 0}
+  m_LocalPosition: {x: 0, y: 4.98, z: 1.25}
   m_LocalScale: {x: 1.5, y: 3.85, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -503,7 +506,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1293279238794793478
 Transform:
   m_ObjectHideFlags: 0
@@ -512,7 +515,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5531399462944159861}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -4.59}
   m_LocalScale: {x: 11.819, y: 11.819, z: 11.819}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -609,7 +612,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6184524525837930313}
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.000000029802322}
-  m_LocalPosition: {x: 0, y: 0, z: 0.1}
+  m_LocalPosition: {x: 0, y: 0, z: 1.3499999}
   m_LocalScale: {x: 0.099999994, y: 0.099999994, z: 0.099999994}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -711,7 +714,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8177517565640679943}
   m_LocalRotation: {x: -0.00000005960465, y: 0.7071068, z: 0.7071068, w: 0.00000005960465}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1.2499999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

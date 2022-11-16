@@ -1,4 +1,3 @@
-using System;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Microsoft.MixedReality.Toolkit.UX;
 using Photon.Pun;
@@ -6,16 +5,15 @@ using UnityEngine;
 
 public class PostItObject : MonoBehaviour, IPunObservable
 {
-    private bool              owned;
-    private bool              ownedByMe;
+    [SerializeField] private bool              owned;
+    [SerializeField] private bool              ownedByMe;
+    [SerializeField] private bool              anchored;
 
     public bool OwnedByMe
     {
         set => owned = ownedByMe = value;
-
     }
     
-    private bool              anchored;
     
     private Transform         camTransform;
     
@@ -23,7 +21,8 @@ public class PostItObject : MonoBehaviour, IPunObservable
     private MRTKTMPInputField     inputField;
     private PhotonTransformView   photonTransformView;
     private Transform             transformComponent;
-    private SphereCollider        sphereCollider;
+    //private SphereCollider        sphereCollider;
+    private Material              cylinderMaterial;
     
 
     private void OnEnable()
@@ -33,8 +32,10 @@ public class PostItObject : MonoBehaviour, IPunObservable
         inputField                         = GetComponentInChildren<MRTKTMPInputField>();
         objectManipulatorComponent         = GetComponent<ObjectManipulator>();
         photonTransformView                = GetComponent<PhotonTransformView>();
-        sphereCollider                     = GetComponentInChildren<SphereCollider>();
+        //sphereCollider                     = GetComponentInChildren<SphereCollider>();
         transformComponent                 = GetComponent<Transform>();
+        cylinderMaterial                   = GetComponentsInChildren<Renderer>()[0].material;
+        cylinderMaterial.color             = Color.black;
         objectManipulatorComponent.enabled = true;
     }
 
@@ -44,10 +45,45 @@ public class PostItObject : MonoBehaviour, IPunObservable
         transformComponent.LookAt(camTransform);
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void OnGrab()
     {
-        //TODO: Check if the collider is board or object to stick
+        OwnedByMe = true;
+        //sphereCollider.gameObject.SetActive(true);
     }
+    
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     //TODO: Check if the collider is board or object to stick
+    //     if (!Physics.Raycast(transformComponent.position, -transformComponent.forward, out var hit, 1f)) 
+    //         return;
+    //     if (!hit.collider.CompareTag("Board") && !hit.collider.CompareTag("Board")) 
+    //         return;
+    //         
+    //     cylinderMaterial.color = Color.green;
+    // }
+    
+    public void OnReleasing()
+    {
+        OwnedByMe = false;
+        if (!Physics.Raycast(transformComponent.position, -transformComponent.forward, out var hit, 0.3f)) 
+            return;
+        Debug.Log("Hit: " + hit.collider.name);
+        if (!hit.collider.CompareTag("Board") && !hit.collider.CompareTag("Object")) 
+            return;
+        anchored = true;
+        //photonTransformView.enabled = false;
+        //sphereCollider.gameObject.SetActive(false);
+        transformComponent.position = hit.point;
+        transformComponent.rotation = Quaternion.LookRotation(hit.normal,
+            Vector3.Angle(transformComponent.up, Vector3.up) > 30f ?
+                transformComponent.up 
+                : Vector3.up);
+    }
+    
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    cylinderMaterial.color = Color.black;
+    //}
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
