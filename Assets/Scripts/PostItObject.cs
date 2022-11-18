@@ -14,7 +14,6 @@ public class PostItObject : MonoBehaviour, IPunObservable
         set => owned = ownedByMe = value;
     }
     
-    
     private Transform         camTransform;
     
     private ObjectManipulator     objectManipulatorComponent;
@@ -23,7 +22,6 @@ public class PostItObject : MonoBehaviour, IPunObservable
     private Transform             transformComponent;
     //private SphereCollider        sphereCollider;
     private Material              cylinderMaterial;
-    
 
     private void OnEnable()
     {
@@ -48,7 +46,7 @@ public class PostItObject : MonoBehaviour, IPunObservable
     public void OnGrab()
     {
         OwnedByMe = true;
-        //sphereCollider.gameObject.SetActive(true);
+        transformComponent.SetParent(null);
     }
     
     // private void OnTriggerEnter(Collider other)
@@ -71,8 +69,8 @@ public class PostItObject : MonoBehaviour, IPunObservable
         if (!hit.collider.CompareTag("Board") && !hit.collider.CompareTag("Object")) 
             return;
         anchored = true;
+        transformComponent.SetParent(hit.collider.transform);
         //photonTransformView.enabled = false;
-        //sphereCollider.gameObject.SetActive(false);
         transformComponent.position = hit.point;
         transformComponent.rotation = Quaternion.LookRotation(hit.normal,
             Vector3.Angle(transformComponent.up, Vector3.up) > 30f ?
@@ -90,6 +88,7 @@ public class PostItObject : MonoBehaviour, IPunObservable
         if (stream.IsWriting)
         {
             stream.SendNext(owned);
+            stream.SendNext(anchored);
             stream.SendNext(inputField.text);
             stream.SendNext(transformComponent.position);
             if (ownedByMe)
@@ -98,6 +97,7 @@ public class PostItObject : MonoBehaviour, IPunObservable
         else
         {
             owned                       = (bool) stream.ReceiveNext();
+            anchored                    = (bool) stream.ReceiveNext();
             inputField.text             = (string) stream.ReceiveNext();
             transformComponent.position = (Vector3) stream.ReceiveNext();
             if (owned)
