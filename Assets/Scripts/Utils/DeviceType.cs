@@ -1,10 +1,10 @@
 namespace Utils
 {
-	public enum DeviceType : byte
-	{
-		VR,
-		AR,
-		HoloLens,
-		Unknown,
-	}
+    public enum DeviceType : byte
+    {
+        VR,
+        AR,
+        HoloLens,
+        Unknown,
+    }
 }

@@ -53,6 +53,7 @@ namespace Shapes
             _paths = new Dictionary<byte, string>
             {
                 #if UNITY_EDITOR
+
                 //string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.obj");
                 { 3, /*Path.GetFullPath*/"Assets/Models/CustomShape.obj" },
                 #else
@@ -76,8 +77,9 @@ namespace Shapes
 
             if (cached is not null && !cached.IsDestroyed())
             {
-                GameObject instantiation             = Instantiate(cached, Vector3.zero, Quaternion.identity);
-                var        instantiationShape        = instantiation.GetComponent<CustomShape>();
+                GameObject instantiation      = Instantiate(cached, Vector3.zero, Quaternion.identity);
+                var        instantiationShape = instantiation.GetComponent<CustomShape>();
+
                 //var        instantiationInteractable = instantiation.GetComponent<XRSimpleInteractable>();
 
                 /*
@@ -104,7 +106,8 @@ namespace Shapes
             Cache.Add(new KeyValuePair<byte, GameObject>(id, mesh));
 
             mesh.AddComponent<BoxCollider>();
-            var rigidbody    = mesh.AddComponent<Rigidbody>();
+            var rigidbody = mesh.AddComponent<Rigidbody>();
+
             //var interactable = mesh.AddComponent<XRSimpleInteractable>();
 
             rigidbody.useGravity = false;

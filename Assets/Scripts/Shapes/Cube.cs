@@ -43,7 +43,7 @@ namespace Shapes
                 Interactors[0].transform.forward, Hits, Transform.rotation,
                 InitialDistance, DefaultMask);
             */
-            
+
             return 0;
         }
 

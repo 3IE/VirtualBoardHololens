@@ -2,11 +2,27 @@ using System;
 using System.Collections;
 using System.Linq;
 using Microsoft.MixedReality.Toolkit.Audio;
-using Photon.Voice.PUN;
-using Photon.Voice.Unity;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+///     Demonstration class using WindowsMicrophoneStream (from com.microsoft.mixedreality.toolkit.micstream) to select the
+///     voice microphone and adjust the spatial awareness mesh based on the amplitude of the user's voice.
+/// </summary>
+[RequireComponent(typeof(AudioSource))]
+public class MicrophoneSys : MonoBehaviour
+{
+//#if !MICSTREAM_PRESENT
+
+    [SerializeField]
+    [Tooltip("Gain to apply to the microphone input.")]
+    [Range(0, 10)]
+    private float inputGain = 1.0f;
+
+    [SerializeField]
+    [Tooltip("Factor by which to boost the microphone amplitude when changing the mesh display.")]
+    [Range(0, 50)]
+    private int amplitudeBoostFactor = 10;
 
 /// <summary>
     /// Demonstration class using WindowsMicrophoneStream (from com.microsoft.mixedreality.toolkit.micstream) to select the
@@ -24,15 +40,12 @@ using UnityEngine.UI;
         
         private Slider inputGainSlider;
 
-        /// <summary>
-        /// Class providing microphone stream management support on Microsoft Windows based devices.
-        /// </summary>
-        private WindowsMicrophoneStream micStream = null;
+    private IEnumerator Start()
+    {
+        yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
 
-        /// <summary>
-        /// The average amplitude of the sound captured during the most recent microphone update.
-        /// </summary>
-        private float averageAmplitude = 0.0f;
+        if (Application.HasUserAuthorization(UserAuthorization.Microphone))
+            PrintVar.print(0, "Microphone device access granted.");
 
         private void Awake()
         {
@@ -41,23 +54,12 @@ using UnityEngine.UI;
 
         private IEnumerator Start()
         {
-            yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
-            if (Application.HasUserAuthorization(UserAuthorization.Microphone))
-                PrintVar.print(0, $"Microphone device access granted.");  
-            //PrintVar.print(0, $"Microphone device detected: {(Microphone.devices == null || Microphone.devices.Length == 0 ? "No microphone detected." : Microphone.devices.First())}");
-            if (Microphone.devices != null) Microphone.Start(Microphone.devices.First(), true, 10, 44100);
-            
-            // We do not wish to play the ambient room sound from the audio source.
-            gameObject.GetComponent<AudioSource>().volume = 0.0f;
+            Microphone.Start(Microphone.devices.First(), true, 10,
+                             44100);
+        }
 
-            micStream = new WindowsMicrophoneStream();
-            if (micStream == null)
-            {
-                Debug.Log("Failed to create the Windows Microphone Stream object");
-                PrintVar.print(2, "Failed to create the Windows Microphone Stream object");
-            }
-
-            micStream.Gain = inputGain;
+        // We do not wish to play the ambient room sound from the audio source.
+        gameObject.GetComponent<AudioSource>().volume = 0.0f;
 
             // Initialize the microphone stream.
             WindowsMicrophoneStreamErrorCode result = micStream.Initialize(WindowsMicrophoneStreamType.HighQualityVoice);
@@ -80,49 +82,36 @@ using UnityEngine.UI;
             PrintVar.print(5, $"Success ?\nmicStream: {micStream.Gain}");
         }
 
-        private void OnDestroy()
+        if (micStream == null)
         {
-            if (micStream == null) { return; }
-
-            // Stop the microphone stream.
-            WindowsMicrophoneStreamErrorCode result = micStream.StopStream();
-            if (result != WindowsMicrophoneStreamErrorCode.Success)
-            {
-                Debug.Log($"Failed to stop the microphone stream. {result}");
-            }
-
-            // Uninitialize the microphone stream.
-            micStream.Uninitialize();
-            micStream = null;
+            Debug.Log("Failed to create the Windows Microphone Stream object");
+            PrintVar.print(2, "Failed to create the Windows Microphone Stream object");
         }
 
-        private void OnDisable()
-        {
-            if (micStream == null) { return; }
+        micStream.Gain = inputGain;
 
-            // Pause the microphone stream.
-            WindowsMicrophoneStreamErrorCode result = micStream.Pause();
-            if (result != WindowsMicrophoneStreamErrorCode.Success)
-            {
-                Debug.Log($"Failed to pause the microphone stream. {result}");
-            }
+        // Initialize the microphone stream.
+        WindowsMicrophoneStreamErrorCode result = micStream.Initialize(WindowsMicrophoneStreamType.HighQualityVoice);
+
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+        {
+            Debug.Log($"Failed to initialize the microphone stream. {result}");
+            PrintVar.print(3, $"Failed to init the Windows Microphone Stream. {result}");
+            yield break;
         }
 
-        private void OnEnable()
-        {
-            if (micStream == null) { return; }
+        // Start the microphone stream.
+        // Do not keep the data and do not preview.
+        result = micStream.StartStream(false, false);
 
-            // Resume the microphone stream.
-            WindowsMicrophoneStreamErrorCode result = micStream.Resume();
-            if (result != WindowsMicrophoneStreamErrorCode.Success)
-            {
-                Debug.Log($"Failed to resume the microphone stream. {result}");
-            }
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+        {
+            Debug.Log($"Failed to start the microphone stream. {result}");
+            PrintVar.print(4, $"Failed to start the Windows Microphone Stream. {result}");
         }
 
-        private void Update()
-        {
-            if (micStream == null) { return; }
+        //PrintVar.print(2, $"micStream: {micStream.Gain}");
+    }
 
             // Update the gain, if changed.
             if (micStream.Gain != inputGain)
@@ -130,7 +119,56 @@ using UnityEngine.UI;
            
         }
 
-        private void OnAudioFilterRead(float[] buffer, int numChannels)
+        // Resume the microphone stream.
+        WindowsMicrophoneStreamErrorCode result = micStream.Resume();
+
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+            Debug.Log($"Failed to resume the microphone stream. {result}");
+    }
+
+    private void OnDisable()
+    {
+        if (micStream == null)
+            return;
+
+        // Pause the microphone stream.
+        WindowsMicrophoneStreamErrorCode result = micStream.Pause();
+
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+            Debug.Log($"Failed to pause the microphone stream. {result}");
+    }
+
+    private void OnDestroy()
+    {
+        if (micStream == null)
+            return;
+
+        // Stop the microphone stream.
+        WindowsMicrophoneStreamErrorCode result = micStream.StopStream();
+
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+            Debug.Log($"Failed to stop the microphone stream. {result}");
+
+        // Uninitialize the microphone stream.
+        micStream.Uninitialize();
+        micStream = null;
+    }
+
+    private void OnAudioFilterRead(float[] buffer, int numChannels)
+    {
+        if (micStream == null)
+            return;
+
+        // Read the microphone stream data.
+        WindowsMicrophoneStreamErrorCode result = micStream.ReadAudioFrame(buffer, numChannels);
+
+        if (result != WindowsMicrophoneStreamErrorCode.Success)
+            Debug.Log($"Failed to read the microphone stream data. {result}");
+
+        float sumOfValues = 0;
+
+        // Calculate this frame's average amplitude.
+        for (var i = 0; i < buffer.Length; i++)
         {
             if (micStream == null) { return; }
 
@@ -161,5 +199,8 @@ using UnityEngine.UI;
             inputGainSlider.value = averageAmplitude;
         }
 
-//#endif // MICSTREAM_PRESENT
+        averageAmplitude = sumOfValues / buffer.Length;
     }
+
+//#endif // MICSTREAM_PRESENT
+}

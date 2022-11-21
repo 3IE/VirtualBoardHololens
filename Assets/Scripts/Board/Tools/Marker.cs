@@ -8,6 +8,7 @@ namespace Board.Tools
     /// <inheritdoc />
     public class Marker : WritingTool
     {
+        public  Color      color = Color.blue;
         private AppManager _appManager;
         private Board      _board;
         private Color[]    _colors;
@@ -21,9 +22,7 @@ namespace Board.Tools
 
         private Transform _tipTransform;
         private Vector2   _touchPos;
-
-        public Color color = Color.blue;
-        private Color boardColor;
+        private Color     boardColor;
 
         private bool Erasing;
 
@@ -33,7 +32,7 @@ namespace Board.Tools
             _appManager = GetComponent<AppManager>();
             _board      = _appManager.BoardTransform.GetComponentInChildren<Board>();
             _renderer   = _appManager.BoardTransform.GetComponentInChildren<Renderer>();
-            
+
             TouchedLast = false;
             Erasing     = false;
             boardColor  = Board.Instance.texture.GetPixel(0, 0);
@@ -43,8 +42,11 @@ namespace Board.Tools
         {
             Tools.Instance.Modified = Draw(touch) || Tools.Instance.Modified;
         }
-        
-        public void StopDraw() => TouchedLast = false;
+
+        public void StopDraw()
+        {
+            TouchedLast = false;
+        }
 
         /// <summary>
         ///     We check if we are in the boundaries of the board
@@ -80,9 +82,9 @@ namespace Board.Tools
                 // If we are touching the board and in its boundaries, then we draw
                 if (!InBound(x, y))
                     return false;
-                    
+
                 PrintVar.print(10, $"Inbound: {touch.textureCoord}");
-                
+
                 if (TouchedLast)
                 {
                     if (Vector2.Distance(new Vector2(x, y), _lastTouchPos) < 0.01f)
@@ -121,13 +123,13 @@ namespace Board.Tools
         public void Eraser(bool active = true)
         {
             if (active == Erasing) return;
-            
+
             penSize = active ? penSize * 5 : penSize / 5;
             color   = active ? boardColor : Color.blue;
-            
+
             Erasing = active;
         }
-        
+
         /// <summary>
         ///     Generates a color array
         /// </summary>
@@ -205,7 +207,7 @@ namespace Board.Tools
             ModifyTexture(modification);
             Tools.Instance.Modified = true;
         }
-        
+
         // TODO add other shapes ?
     }
 }

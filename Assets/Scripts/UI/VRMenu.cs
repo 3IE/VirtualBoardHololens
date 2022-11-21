@@ -13,8 +13,8 @@ namespace UI
         [SerializeField] private List<GameObject> panels;
         [SerializeField] private List<GameObject> panelsButtons;
 
-        private PanelIndex  _activePanelIndex = PanelIndex.PlayerList;
-        private CanvasGroup _canvasGroup;
+        private PanelIndex        _activePanelIndex = PanelIndex.PlayerList;
+        private CanvasGroup       _canvasGroup;
         private ObjectManipulator _objectManipulator;
         
         [SerializeField] private GameObject postItPrefab;
@@ -26,7 +26,7 @@ namespace UI
 
         private void Awake()
         {
-            _canvasGroup = GetComponent<CanvasGroup>();
+            _canvasGroup       = GetComponent<CanvasGroup>();
             _objectManipulator = GetComponent<ObjectManipulator>();
         }
 
@@ -78,10 +78,10 @@ namespace UI
         {
             StopAllCoroutines();
 
-            _objectManipulator.enabled = true;
-            _canvasGroup.interactable = true;
+            _objectManipulator.enabled  = true;
+            _canvasGroup.interactable   = true;
             _canvasGroup.blocksRaycasts = true;
-            _canvasGroup.alpha = 1;
+            _canvasGroup.alpha          = 1;
         }
 
         /// <summary>
@@ -132,5 +132,41 @@ namespace UI
             PropsList,
             ToolList,
         }
+
+        #region throwAway
+
+        /// <summary>
+        ///     If the menu is thrown with at sufficient speed (>throwThreshold)
+        ///     it will fade out and disable itself
+        /// </summary>
+        //public void ThrowAway()
+        //{
+        //    StartCoroutine(ThrowAwayRoutine());
+        //}
+
+        //private IEnumerator ThrowAwayRoutine()
+        //{
+        //    if (velocity < throwThreshold) yield break;
+        //    _objectManipulator.enabled = false;
+        //    
+        //    var i = 0.0f;
+//
+        //    while (i < timeToFade)
+        //    {
+        //        _canvasGroup.alpha =  Mathf.Lerp(1f, 0f, i / timeToFade);
+        //        i                  += Time.fixedDeltaTime;
+//
+        //        yield return null;
+        //    }
+        //}
+
+        //private void Update()
+        //{
+        //    velocity = (transform.position - lastPosition).magnitude / Time.fixedDeltaTime;
+        //    lastPosition = transform.position;
+        //    PrintVar.print(9, $"Velocity: {velocity}");
+        //}
+
+        #endregion
     }
 }

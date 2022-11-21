@@ -1,9 +1,10 @@
 using System;
-using Board;
+using System.Collections.Generic;
 using Board.Tools;
 using ExitGames.Client.Photon;
 using Microsoft.MixedReality.Toolkit.SpatialManipulation;
 using Photon.Pun;
+using Refactor;
 using Shapes;
 using TMPro;
 using UnityEngine;
@@ -12,13 +13,15 @@ using Utils;
 
 namespace Manager
 {
-    public class AppManager : MonoBehaviourPunCallbacks
+    public abstract class AppManager : MonoBehaviourPunCallbacks
     {
-        [SerializeField] private MenuSystem menuSystem;
-        private                  Camera     cam;
+        public static            Dictionary<int, PlayerManagerV2> Players;
+        [SerializeField] private MenuSystem                       menuSystem;
 
         [SerializeField] private PingSearcher pingSearcher;
 
+        [SerializeField] private float        refreshRate = 0.2f;
+        private                  Camera       _cam;
         private                  EventManager _eventManager;
         private                  RaycastHit   _hit;
 
@@ -29,20 +32,23 @@ namespace Manager
 
         public Transform CamTransform
         {
-            get
-            {
-                return cam.transform;
-            }
+            get { return _cam.transform; }
         }
 
         public Transform BoardTransform { get; private set; }
 
+        protected virtual void Awake()
+        {
+            Players = new Dictionary<int, PlayerManagerV2>();
+        }
+
         private void Start()
         {
-            cam            = Camera.main;
+            _cam           = Camera.main;
             _inputManager  = GetComponent<InputManager>();
             _eventManager  = GetComponent<EventManager>();
             _playerManager = GetComponent<HoloPlayerManager>();
+
             BoardTransform = board.transform;
         }
 
@@ -124,6 +130,96 @@ namespace Manager
             BoardTransform.rotation.eulerAngles.Set(0, currentRotation.y, 0);
             BoardTransform.GetComponent<ObjectManipulator>().enabled = false;
             menuSystem.SwitchPanel(MenuSystem.MenuIndex.Join);
+        }
+
+        #endregion
+
+        #region PLAYER_EVENTS
+
+        protected void OnPlayerEvent(EventCode eventCode, object data, EventData photonEvent)
+        {
+            switch (eventCode)
+            {
+                case EventCode.SendNewPostIt:
+                    var     dataArr   = (object[]) data;
+                    var     postItPos = (Vector2) dataArr[0];
+                    var     text      = (string) dataArr[1];
+                    Vector3 boardPos  = board.transform.position;
+
+                    Post_it_Instantiate(
+                                        new Vector3(boardPos.x + postItPos.x, boardPos.y + postItPos.y, boardPos.z)
+                                      , text, Color.cyan); // On verra plus tard pour que la couleur varie en fc du joueur
+                    break;
+
+                case EventCode.SendNewPing:
+                    OnlinePing((Vector2) data);
+                    break;
+
+                case EventCode.SendNewPosition:
+                    Players[photonEvent.Sender].entity.UpdateTransforms(data as object[]);
+                    break;
+
+                default:
+                    throw new ArgumentException($"Invalid Code: {eventCode}");
+            }
+        }
+
+        #endregion
+
+        #region TOOL_EVENTS
+
+        private void OnToolEvent(EventCode eventCode, object data)
+        {
+            switch (eventCode)
+            {
+                case EventCode.Marker:
+                case EventCode.Eraser:
+                    Marker.AddModification(new Modification(data));
+                    break;
+
+                case EventCode.Texture:
+                    //TODO: DELETE and replace
+                    //Board.Board.Instance.texture.LoadImage(data as byte[]);
+                    break;
+
+                default:
+                    throw new ArgumentException("Unknown event code");
+            }
+        }
+
+        #endregion
+
+        #region OBJECT_EVENTS
+
+        protected static void OnObjectEvent(EventCode eventCode, object data)
+        {
+            PrintVar.print(1, $"NewObjectEvent: {eventCode.ToString()}");
+
+            switch (eventCode)
+            {
+                case EventCode.SendNewObject:
+                    Shape.ReceiveNewObject(data as object[]);
+                    break;
+
+                case EventCode.SendDestroy:
+                    Shape.ReceiveDestroy((int) data);
+                    break;
+
+                case EventCode.SendTransform:
+                    Shape.ReceiveTransform(data as object[]);
+                    break;
+
+                case EventCode.SendOwnership:
+                    Shape.ReceiveOwnership(data as object[]);
+                    break;
+
+                case EventCode.SendCounter:
+                    Shape.ReceiveCounter((int) data);
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid event code");
+            }
         }
 
         #endregion
@@ -228,7 +324,7 @@ namespace Manager
         //    PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPostIt, content, raiseEventOptions, SendOptions.SendReliable);
         //}
 
-        private void OnEvent(EventData photonEvent)
+        protected virtual void OnEvent(EventData photonEvent)
         {
             byte eventCode = photonEvent.Code;
 
@@ -239,7 +335,7 @@ namespace Manager
                     break;
 
                 case < 20:
-                    OnPlayerEvent((EventCode) eventCode, photonEvent.CustomData);
+                    OnPlayerEvent((EventCode) eventCode, photonEvent.CustomData, photonEvent);
                     break;
 
                 case < 30:
@@ -255,90 +351,6 @@ namespace Manager
 
                 default:
                     throw new ArgumentException($"Invalid Code: {eventCode}");
-            }
-        }
-
-        #endregion
-
-        #region PLAYER_EVENTS
-
-        private void OnPlayerEvent(EventCode eventCode, object data)
-        {
-            switch (eventCode)
-            {
-                case EventCode.SendNewPostIt:
-                    var     dataArr   = (object[]) data;
-                    var     postItPos = (Vector2) dataArr[0];
-                    var     text      = (string) dataArr[1];
-                    Vector3 boardPos  = board.transform.position;
-
-                    Post_it_Instantiate(
-                                        new Vector3(boardPos.x + postItPos.x, boardPos.y + postItPos.y, boardPos.z)
-                                      , text, Color.cyan); // On verra plus tard pour que la couleur varie en fc du joueur
-                    break;
-
-                case EventCode.SendNewPing:
-                    OnlinePing((Vector2) data);
-                    break;
-
-                default:
-                    throw new ArgumentException($"Invalid Code: {eventCode}");
-            }
-        }
-
-        #endregion
-
-        #region TOOL_EVENTS
-
-        private void OnToolEvent(EventCode eventCode, object data)
-        {
-            switch (eventCode)
-            {
-                case EventCode.Marker:
-                case EventCode.Eraser:
-                    Marker.AddModification(new Modification(data));
-                    break;
-
-                case EventCode.Texture:
-                    Board.Board.Instance.texture.LoadImage(data as byte[]);
-                    break;
-
-                default:
-                    throw new ArgumentException("Unknown event code");
-            }
-        }
-
-        #endregion
-        
-        #region OBJECT_EVENTS
-
-        private static void OnObjectEvent(EventCode eventCode, object data)
-        {
-            PrintVar.print(1, $"NewObjectEvent: {eventCode.ToString()}");
-            switch (eventCode)
-            {
-                case EventCode.SendNewObject:
-                    Shape.ReceiveNewObject(data as object[]);
-                    break;
-
-                case EventCode.SendDestroy:
-                    Shape.ReceiveDestroy((int) data);
-                    break;
-
-                case EventCode.SendTransform:
-                    Shape.ReceiveTransform(data as object[]);
-                    break;
-
-                case EventCode.SendOwnership:
-                    Shape.ReceiveOwnership(data as object[]);
-                    break;
-
-                case EventCode.SendCounter:
-                    Shape.ReceiveCounter((int) data);
-                    break;
-
-                default:
-                    throw new ArgumentException("Invalid event code");
             }
         }
 

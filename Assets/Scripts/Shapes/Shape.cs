@@ -23,6 +23,8 @@ namespace Shapes
         /// </summary>
         protected static readonly Dictionary<int, Shape> Shapes = new();
 
+        private static Transform _boardTransform;
+
         private bool _created;
         private bool _deleting;
 
@@ -34,8 +36,6 @@ namespace Shapes
         private bool _locked;
 
         private Rigidbody _rigidbody;
-        
-        private static Transform _boardTransform;
 
         protected int DefaultMask;
         protected int DefaultPlayerMask;
@@ -331,10 +331,10 @@ namespace Shapes
         /// </summary>
         public static void ReceiveTransform(object[] data)
         {
-            var position = (Vector3) data[0] + _boardTransform.position;
-            var rotation = (Quaternion) data[1];
-            var scale    = (Vector3) data[2];
-            var id       = (int) data[3];
+            Vector3 position = (Vector3) data[0] + _boardTransform.position;
+            var     rotation = (Quaternion) data[1];
+            var     scale    = (Vector3) data[2];
+            var     id       = (int) data[3];
 
             Transform shape = Shapes[id].transform;
 
