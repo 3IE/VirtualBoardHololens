@@ -8,7 +8,6 @@ using Refactor;
 using Shapes;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Utils;
 
 namespace Manager
@@ -228,15 +227,6 @@ namespace Manager
 
         [Header("Prefabs")]
 
-        //[SerializeField] private GameObject pingBall;
-        public GameObject postItPrefab;
-
-        [FormerlySerializedAs("VRAvatarPrefab")]
-        public GameObject vrAvatarPrefab;
-
-        [FormerlySerializedAs("ARAvatarPrefab")]
-        public GameObject arAvatarPrefab;
-
         public GameObject localPingPrefab;
         public GameObject onlinePingPrefab;
         public GameObject board;
@@ -294,36 +284,13 @@ namespace Manager
         //}
         private GameObject Post_it_Instantiate(Vector3 position, string text, Color color)
         {
-            GameObject postIt = Instantiate(postItPrefab, position, BoardTransform.rotation,
-                                            board.transform);
+            GameObject postIt = PhotonNetwork.Instantiate("postItPrefab", position, BoardTransform.rotation);
 
             postIt.GetComponentInChildren<TMP_Text>().text           = text;
             postIt.GetComponentInChildren<Renderer>().material.color = color;
 
             return postIt;
         }
-
-        // Pool a ball at a position, then 1sec later pull it back
-        //private IEnumerator PingBall(Vector3 position)
-        //{
-        //    pingBall.transform.position = position;
-        //    pingBall.SetActive(true);
-        //    yield return new WaitForSeconds(1);
-        //    pingBall.SetActive(false);
-        //    // pingBall.transform.position = new Vector3(0, 0, 0); // Pas forcément important
-        //}
-        //public static void SendNewPostItEvent(Vector2 position, string text)
-        //{
-        //    // We send the whole texture
-        //    object[] content = { position, text };
-
-        //    // We send the data to every other person in the room
-        //    var raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-
-        //    // We send the event
-        //    PhotonNetwork.RaiseEvent((byte) Event.EventCode.SendNewPostIt, content, raiseEventOptions, SendOptions.SendReliable);
-        //}
-
         protected virtual void OnEvent(EventData photonEvent)
         {
             byte eventCode = photonEvent.Code;

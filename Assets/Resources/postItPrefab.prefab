@@ -17,8 +17,8 @@ GameObject:
   - component: {fileID: 3526865317133064316}
   - component: {fileID: 7338471148419335778}
   m_Layer: 0
-  m_Name: postItPrefabAlter
-  m_TagString: Untagged
+  m_Name: postItPrefab
+  m_TagString: Object
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -797,6 +797,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1810163920, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
+      propertyPath: m_enableWordWrapping
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7291631689291610058, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -895,6 +899,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8151316412965049220, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8181830384732966930, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
+      propertyPath: m_LineType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8181830384732966930, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
+      propertyPath: m_LineLimit
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8181830384732966930, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}
+      propertyPath: m_ContentType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8181830384732966930, guid: d4ba24552c5dc52438a24daebf18b488, type: 3}

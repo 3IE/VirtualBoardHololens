@@ -9,27 +9,8 @@ using UnityEngine.UI;
 ///     Demonstration class using WindowsMicrophoneStream (from com.microsoft.mixedreality.toolkit.micstream) to select the
 ///     voice microphone and adjust the spatial awareness mesh based on the amplitude of the user's voice.
 /// </summary>
-[RequireComponent(typeof(AudioSource))]
+/*
 public class MicrophoneSys : MonoBehaviour
-{
-//#if !MICSTREAM_PRESENT
-
-    [SerializeField]
-    [Tooltip("Gain to apply to the microphone input.")]
-    [Range(0, 10)]
-    private float inputGain = 1.0f;
-
-    [SerializeField]
-    [Tooltip("Factor by which to boost the microphone amplitude when changing the mesh display.")]
-    [Range(0, 50)]
-    private int amplitudeBoostFactor = 10;
-
-/// <summary>
-    /// Demonstration class using WindowsMicrophoneStream (from com.microsoft.mixedreality.toolkit.micstream) to select the
-    /// voice microphone and adjust the spatial awareness mesh based on the amplitude of the user's voice.
-    /// </summary>
-    [RequireComponent(typeof(AudioSource))]
-    public class MicrophoneSys : MonoBehaviour
     {
 //#if !MICSTREAM_PRESENT
 
@@ -204,3 +185,4 @@ public class MicrophoneSys : MonoBehaviour
 
 //#endif // MICSTREAM_PRESENT
 }
+*/
